@@ -1,0 +1,2170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ocean ABC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A sea creature game for babies and toddlers. Press a letter to meet the ocean animals that start with it, then tap one to hear its name, from Anglerfish to Zoanthid.">
+<meta name="theme-color" content="#d4f3f1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='12' fill='%233cc4b8'/%3E%3Crect x='11' y='11' width='42' height='42' rx='8' fill='%23fffdf8'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial Rounded MT Bold,Arial,sans-serif' font-weight='700' font-size='34' fill='%230c6f66'%3EO%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/ocean/apple-touch-icon.png">
+<!-- Link previews. If the game moves away from https://grabe.com/ocean/, change these URLs. -->
+<link rel="canonical" href="https://grabe.com/ocean/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://grabe.com/ocean/">
+<meta property="og:title" content="Ocean ABC · A sea creature for every letter">
+<meta property="og:description" content="Press a letter to meet the sea creatures that start with it, then tap one to hear its name. 180+ ocean animals, from Anglerfish to Zoanthid.">
+<meta property="og:image" content="https://grabe.com/ocean/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Cartoon sea creatures on cards: a clownfish, an octopus and a sea turtle, with the words Ocean ABC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ocean ABC · A sea creature for every letter">
+<meta name="twitter:description" content="Press a letter to meet the sea creatures that start with it, then tap one to hear its name. 180+ ocean animals, from Anglerfish to Zoanthid.">
+<meta name="twitter:image" content="https://grabe.com/ocean/og-image.png">
+<meta name="twitter:image:alt" content="Cartoon sea creatures on cards: a clownfish, an octopus and a sea turtle, with the words Ocean ABC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800&family=Noto+Color+Emoji&display=swap">
+<style>
+/* Layout: a letter block and a heading on top, a wrap of sea creature cards below (scrolls when
+   a letter has many), the alphabet along the bottom. Single bright theme: the background
+   changes colour with each letter, like the other two games. */
+:root {
+  --ink: #2d2440;
+  --ink-soft: #5c5a74;
+  --face: #fffdf8;
+  --bg: #d4f3f1;
+  --rim: #3cc4b8;
+  --rim-dark: #1f9488;
+  --accent: #0c6f66;
+  --shadow: rgba(45, 36, 64, .16);
+  --font-display: "Fredoka", "Baloo 2", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  color-scheme: light;
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+  transition: background-color .5s ease;
+}
+*, *::before, *::after { box-sizing: inherit; }
+
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  transition: background-color .5s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.stage {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 16px;
+}
+
+/* Top bar */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  font: 800 clamp(13px, 1.7vmin, 16px)/1.2 var(--font-ui);
+  color: var(--ink-soft);
+  transition: background-color .3s, color .3s;
+}
+.hint kbd {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--face);
+  box-shadow: 0 3px 0 var(--rim-dark);
+  font: 600 16px/1 var(--font-display);
+  color: var(--accent);
+}
+.away .hint {
+  background: var(--ink);
+  color: var(--face);
+  animation: nudge 1.6s ease-in-out infinite;
+}
+.controls { display: flex; gap: 8px; flex: none; }
+.ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--face) 72%, transparent);
+  color: var(--ink);
+  font: 800 14px/1 var(--font-ui);
+  cursor: pointer;
+}
+.ctrl:hover { background: var(--face); }
+.ctrl svg { width: 22px; height: 22px; flex: none; }
+.ctrl .off, .ctrl[aria-pressed="false"] .on { display: none; }
+.ctrl[aria-pressed="false"] .off { display: inline; }
+button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* Scene */
+.scene {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2.4vmin, 22px);
+  padding: 6px 4px 14px;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.6vmin, 24px);
+}
+.head h1 {
+  margin: 0;
+  font: 600 clamp(22px, 4.4vmin, 42px)/1.05 var(--font-display);
+  color: var(--ink);
+  text-wrap: balance;
+}
+.head h1 b { color: var(--accent); font-weight: 700; }
+.head p {
+  margin: 6px 0 0;
+  font: 700 clamp(13px, 1.9vmin, 17px)/1.3 var(--font-ui);
+  color: var(--ink-soft);
+}
+
+/* A wooden alphabet block, as in the other games */
+.block {
+  --s: clamp(64px, 12vmin, 104px);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  border-radius: calc(var(--s) * .16);
+  background: var(--face);
+  box-shadow:
+    inset 0 0 0 calc(var(--s) * .065) var(--rim),
+    0 calc(var(--s) * .055) 0 var(--rim-dark),
+    0 calc(var(--s) * .1) calc(var(--s) * .09) var(--shadow);
+  font: 600 calc(var(--s) * .64)/1 var(--font-display);
+  color: var(--accent);
+}
+.block::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--s) * .13);
+  border-radius: calc(var(--s) * .07);
+  border: calc(var(--s) * .014) solid color-mix(in srgb, var(--rim) 45%, transparent);
+}
+.block span { position: relative; }
+
+/* Creature cards */
+.cards {
+  --cw: clamp(160px, 19vw, 236px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+}
+.card {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: var(--cw);
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--face);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--rim-dark) 45%, transparent), 0 10px 22px var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+  animation: cardIn .45s calc(var(--i) * 55ms) cubic-bezier(.3, 1.4, .5, 1) both;
+}
+.card:hover { transform: translateY(-3px); }
+.card:active { transform: translateY(2px); }
+.card.now { box-shadow: 0 0 0 4px var(--rim), 0 4px 0 4px var(--rim-dark), 0 10px 22px var(--shadow); }
+.art { position: relative; display: block; aspect-ratio: 240 / 170; }
+.art.reef { background: linear-gradient(#c4f1ec, #8fdcd3); }
+.art.open { background: linear-gradient(#b3e0fa, #6eb4e6); }
+.art.deep { background: linear-gradient(#26386a, #101b3d); }
+.art.ice { background: linear-gradient(#e2f3fb, #a6d3ec); }
+.art.floor { background: linear-gradient(#bfe6f5, #8ccbe6); }
+.art.kelp { background: linear-gradient(#d3f1ea, #84c8bb); }
+.art.snow { background: linear-gradient(#eef7ff, #d6eaf8); }
+.art.beach { background: linear-gradient(#e8f5ff, #d2ecfb); }
+.art svg { display: block; width: 100%; height: 100%; }
+.hear {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--face) 85%, transparent);
+  color: var(--ink);
+}
+.hear svg { width: 18px; height: 18px; }
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px 14px;
+}
+.name {
+  font: 600 clamp(16px, 9.2cqi, 23px)/1.1 var(--font-display);
+  color: var(--ink);
+}
+.name b { color: var(--accent); font-weight: 700; }
+.say {
+  font: 800 12px/1.25 var(--font-ui);
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+}
+.fact {
+  font: 700 12.5px/1.3 var(--font-ui);
+  color: var(--ink-soft);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rim) 20%, var(--face));
+  font: 800 11.5px/1.1 var(--font-ui);
+  color: var(--ink);
+}
+.chip i { font-style: normal; font-family: var(--font-emoji); }
+
+.critter {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+  animation: bob 3.6s calc(var(--i) * -.7s) ease-in-out infinite;
+}
+.card.talk .critter { animation: hop .8s cubic-bezier(.3, 1.4, .5, 1); }
+.still .card { animation: none; }
+
+@keyframes cardIn {
+  from { transform: translateY(24px) scale(.85); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes bob {
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-2.5%) rotate(-1deg); }
+}
+@keyframes hop {
+  0% { transform: none; }
+  25% { transform: scale(1.06, .92); }
+  55% { transform: translateY(-11%) scale(.96, 1.06) rotate(-3deg); }
+  80% { transform: translateY(1%) scale(1.03, .96); }
+  100% { transform: none; }
+}
+@keyframes pop {
+  from { transform: scale(.3) rotate(-14deg); opacity: 0; }
+  60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  to { transform: none; }
+}
+@keyframes nudge {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.04); }
+}
+@keyframes fade { from { opacity: 0; } }
+.head .block { animation: pop .55s cubic-bezier(.3, 1.5, .5, 1) both; }
+.still .head .block { animation: none; }
+
+/* Alphabet strip */
+.strip {
+  --kg: 4px;
+  --k: min(42px, calc((100vw - 32px - 25 * var(--kg)) / 26));
+  display: grid;
+  grid-template-columns: repeat(26, var(--k));
+  gap: var(--kg);
+  justify-content: center;
+}
+.key {
+  width: var(--k);
+  height: var(--k);
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-radius: 30%;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  font: 600 calc(var(--k) * .5)/1 var(--font-display);
+  cursor: pointer;
+  transition: background-color .3s, color .3s, transform .2s;
+}
+.key.seen { background: var(--c); border-color: transparent; color: var(--ink); }
+.key.now { transform: translateY(-4px); border-color: var(--ink); }
+
+.sr { position: absolute; top: 0; left: 0; margin: 0; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 820px) {
+  .strip {
+    --k: min(40px, calc((100vw - 32px - 12 * var(--kg)) / 13));
+    grid-template-columns: repeat(13, var(--k));
+  }
+}
+@media (max-width: 560px) {
+  .cards { --cw: calc((100vw - 32px - 20px) / 2); gap: 12px; }
+  .info { padding: 8px 10px 12px; }
+  .say { font-size: 11px; }
+  .fact { font-size: 11.5px; }
+  .chip { font-size: 10.5px; padding: 4px 7px; }
+  .ctrl { padding: 0; width: 44px; justify-content: center; }
+  .ctrl span { display: none; }
+}
+@media (max-height: 460px) {
+  .strip { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .head .block, .critter, .card.talk .critter, .away .hint { animation: fade .3s both !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="top">
+    <p class="hint"><kbd aria-hidden="true">O</kbd><span id="hintText">Press a letter, then tap a sea creature</span></p>
+    <div class="controls">
+      <button class="ctrl" id="soundBtn" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3.5 9.5v5h4l5 4v-13l-5 4z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <g class="on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9a4.5 4.5 0 0 1 0 6"/><path d="M18.6 6.5a8 8 0 0 1 0 11"/></g>
+          <g class="off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g>
+        </svg>
+        <span>Sound on</span>
+      </button>
+      <button class="ctrl" id="fsBtn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <g class="on"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></g>
+          <g class="off"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></g>
+        </svg>
+        <span>Full screen</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="scene still" id="scene">
+    <div class="head">
+      <div class="block" id="block"><span id="blockLetter">O</span></div>
+      <div>
+        <h1 id="title">Sea creatures that start with <b>O</b></h1>
+        <p id="sub">Tap one to hear its name.</p>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <nav class="strip" id="strip" aria-label="Alphabet"></nav>
+</div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<script>
+(() => {
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const MAX_PER_LETTER = 10;
+
+  // name | fun fact | body plan | drawing flags | colour | pattern | where it lives | size | spoken (optional) | how to say it (optional)
+  const ROWS = [
+    'Anglerfish|Has a glowing light on its head|fish|shape=angler lure teeth|purple|none|deep|hand',
+    'Angelfish|Flat and tall, with long fins|fish|shape=tall|yellow|stripes|reef|hand',
+    'Anemone|Stings with soft, wiggly arms|anemone||pink|none|reef|hand|A nem oh nee|ah-NEM-oh-nee',
+    'Abalone|Shiny like a rainbow inside its shell|shell|kind=abalone|teal|none|floor|hand|Ab a lone ee|ab-ah-LOH-nee',
+    'Anchovy|Swims in big, shiny groups|fish|shape=torpedo small|silver|none|open|finger',
+    'Arrow crab|Has long, thin, spidery legs|crab|kind=arrow|orange|stripes|reef|hand',
+    'Atolla jellyfish|Flashes blue lights in the dark|jelly|kind=atolla|red|none|deep|hand|A tolla jellyfish|ah-TOL-ah',
+    'Amberjack|A fast fish with a golden stripe|fish|shape=torpedo lat=yellow|silver|none|open|dog',
+
+    'Blue whale|The biggest animal that ever lived|ceta|kind=blue|blue|spots|open|bus2',
+    'Beluga|A white whale that whistles and clicks|ceta|kind=beluga|white|none|ice|car',
+    'Barracuda|Long and silver, with sharp teeth|fish|shape=long teeth|silver|stripes|reef|person',
+    'Boxfish|Shaped like a little box|fish|shape=box acc=navy|yellow|spots|reef|hand',
+    'Blue shark|A slim, bright blue shark|shark||blue|none|open|car',
+    'Butterflyfish|Has a pretend eye near its tail|fish|shape=tall eyespot|yellow|stripes|reef|hand',
+    'Blue tang|A blue fish with a yellow tail|fish|shape=tall fins=yellow|blue|none|reef|hand',
+    'Box jellyfish|Its bell is shaped like a box|jelly|kind=box|sky|none|open|cat',
+    'Brittle star|Wiggles its thin arms to move|star|kind=brittle|orange|none|floor|hand',
+    'Blue-ringed octopus|Shows off bright blue rings|octo|kind=blueringed|yellow|none|reef|hand',
+
+    'Clownfish|Lives safely inside sea anemones|fish|shape=oval bands|orange|none|reef|hand',
+    'Crab|Walks sideways on eight legs|crab||red|none|shore|hand',
+    'Clam|Opens and closes its two shells|shell|kind=clam|cream|none|floor|hand',
+    'Cuttlefish|Changes color in a flash|squid|kind=cuttle|brown|stripes|reef|hand',
+    'Coral|Tiny animals that build reefs|coral|kind=branch|pink|none|reef|hand',
+    'Conch|You can blow its shell like a horn|shell|kind=conch|cream|none|floor|cat|Konk|KONK',
+    'Comb jelly|Shimmers with rainbow lights|jelly|kind=comb|sky|none|open|finger',
+    'Cowfish|Has two little horns like a cow|fish|shape=box horns|orange|spots|reef|hand',
+    'Coelacanth|Found alive in 1938, after people thought it was gone|fish|shape=lobe|blue|whitespots|deep|person|See la kanth|SEE-lah-kanth',
+    'Cod|Has a little whisker on its chin|fish|shape=oval barbel|lime|spots|ice|dog',
+
+    'Dolphin|Clicks and whistles to talk|ceta|kind=dolphin|gray|none|open|person',
+    'Dugong|Munches on sea grass|manatee|dugong|brown|none|reef|car|Doo gong|DOO-gong',
+    'Dumbo octopus|Flaps fins that look like ears|octo|kind=dumbo|pink|none|deep|hand',
+    'Damselfish|Small, and guards its home|fish|shape=oval small|blue|none|reef|hand',
+    'Decorator crab|Sticks seaweed on its shell to hide|crab|kind=decorator|orange|none|reef|hand',
+    'Dogfish|A small shark with spots|shark||gray|spots|floor|dog',
+    'Dragonfish|Makes its own light in the dark|fish|shape=long teeth lure bigeye|purple|none|deep|hand',
+
+    'Eel|Long and wiggly, like a snake|eel|kind=moray|gray|none|reef|dog',
+    'Electric ray|Can make a zap of electricity|ray|kind=electric|brown|spots|floor|dog',
+    'Elephant seal|Has a big, floppy nose|pinni|kind=elephant|brown|none|shore|car',
+    'Emperor penguin|The tallest penguin|penguin|kind=emperor|navy|none|ice|kid',
+    'Eagle ray|Flies through the water on wide fins|ray|kind=eagle|navy|whitespots|open|car',
+    'Emperor angelfish|Covered in blue and yellow stripes|fish|shape=tall acc=yellow fins=yellow|blue|stripes|reef|cat',
+    'Elkhorn coral|Its branches look like elk antlers|coral|kind=elkhorn|orange|none|reef|car',
+
+    'Flounder|Lies flat, with both eyes on top|fish|shape=flat|brown|spots|floor|cat',
+    'Flying fish|Glides above the water|fish|shape=flying|blue|none|open|cat',
+    'Fangtooth|Has very big teeth for its size|fish|shape=angler teeth|brown|none|deep|hand',
+    'Frogfish|Walks on its fins|fish|shape=round lumpy|orange|spots|reef|hand',
+    'Fiddler crab|Waves one giant claw|crab|kind=fiddler acc=yellow|purple|none|shore|coin',
+    'Fur seal|Has thick, soft fur|pinni|kind=sealion|brown|none|shore|person',
+    'Feather star|Has feathery arms|star|kind=feather|red|none|reef|hand',
+    'Filefish|Its skin feels rough like sandpaper|fish|shape=tall|lime|spots|reef|hand',
+
+    'Great white shark|The biggest hunting fish|shark|teeth|gray|none|open|car',
+    'Giant squid|Has eyes as big as plates|squid|kind=giant|red|none|deep|bus',
+    'Grouper|A big fish with a big mouth|fish|shape=oval bigmouth|brown|spots|reef|dog',
+    'Goby|Tiny, and lives on the sea floor|fish|shape=long small|yellow|spots|floor|finger',
+    'Garden eel|Pokes out of the sand like grass|eel|kind=garden|cream|spots|floor|cat',
+    'Green sea turtle|Eats sea grass and seaweed|turtle||green|none|reef|dog',
+    'Giant clam|The biggest clam in the world|shell|kind=giantclam|purple|none|reef|dog',
+    'Gray whale|Swims very far every year|ceta|kind=gray|gray|whitespots|open|bus',
+    'Giant Pacific octopus|The biggest octopus|octo|kind=giant|red|spots|floor|car',
+    'Goblin shark|Has a long, flat snout|shark|kind=goblin teeth|pink|none|deep|car',
+
+    'Hammerhead shark|Has a head shaped like a hammer|shark|kind=hammer|gray|none|open|car',
+    'Humpback whale|Sings long songs|ceta|kind=humpback|navy|none|open|bus',
+    'Hermit crab|Lives in a borrowed shell|hermit|acc=cream|orange|none|shore|hand',
+    'Hawksbill turtle|Has a pointy beak like a bird|turtle|beak|orange|none|reef|dog',
+    'Horseshoe crab|Older than the dinosaurs|horseshoe||brown|none|shore|cat',
+    'Harbor seal|Rests on rocks by the shore|pinni||gray|spots|shore|person',
+    'Harp seal|Babies have fluffy white fur|pinni|kind=harp|white|none|ice|person',
+    'Herring|Swims in huge groups|fish|shape=torpedo|silver|none|open|hand',
+    'Halibut|A big, flat fish|fish|shape=flat|gray|spots|floor|person',
+    'Hogfish|Digs in the sand with its snout|fish|shape=oval snout=short|pink|none|reef|cat',
+
+    'Isopod|Looks like a giant pill bug|isopod||purple|none|deep|cat|Eye so pod|EYE-soh-pod',
+    'Icefish|Its blood is clear, not red|fish|shape=long bigeye|white|none|ice|cat',
+    'Immortal jellyfish|Can turn back into a baby|jelly|kind=immortal|pink|none|open|tiny',
+    'Imperial shrimp|Rides on sea slugs and sea cucumbers|crust|kind=shrimp|orange|whitespots|reef|coin',
+
+    'Jellyfish|Has no bones and no brain|jelly||pink|none|open|hand',
+    'John Dory|Has a big dark spot on its side|fish|shape=tall spot|silver|none|open|cat',
+    'Jawfish|Digs a burrow and peeks out|fish|shape=oval small bigeye bigmouth|yellow|none|floor|hand',
+    'Jackfish|A fast, shiny silver fish|fish|shape=torpedo|silver|stripes|open|dog',
+    'Japanese spider crab|Has the longest legs of any crab|crab|kind=spider|orange|whitespots|deep|car',
+    'Jewel anemone|Bright and colorful, like little jewels|anemone|kind=jewel|pink|none|reef|coin',
+
+    'Killer whale|A big dolphin, black and white|ceta|kind=orca|navy|none|ice|truck',
+    'King crab|A big, spiky crab from cold seas|crab|kind=king|red|none|ice|person',
+    'Krill|Tiny, and whales eat lots of them|crust|kind=krill|pink|none|ice|finger',
+    'King penguin|Has bright orange ear patches|penguin|kind=king|navy|none|ice|kid',
+    'Kingfish|A big, strong ocean fish|fish|shape=torpedo lat=yellow|silver|none|open|dog',
+    "Kemp's ridley turtle|The smallest sea turtle|turtle||gray|none|open|cat",
+
+    'Lobster|Has two big claws|crust|kind=lobster|red|none|floor|cat',
+    'Lionfish|Has long, spiky fins like a lion|fish|shape=lion acc=white|red|stripes|reef|hand',
+    'Leafy sea dragon|Looks like floating seaweed|dragon|kind=leafy|yellow|none|reef|hand',
+    'Lanternfish|Has glowing spots|fish|shape=oval small glow bigeye|blue|none|deep|finger',
+    'Leatherback turtle|The biggest turtle|turtle|kind=leather|navy|whitespots|open|person',
+    "Lion's mane jellyfish|Its tentacles can be longer than a blue whale|jelly|kind=lionmane|orange|none|ice|bus2",
+    'Limpet|Sticks tight to rocks|shell|kind=limpet|brown|none|shore|coin',
+    'Lemon shark|A yellowish shark|shark||yellow|none|reef|car',
+    'Leopard seal|Has spots like a leopard|pinni|kind=leopard|gray|spots|ice|car',
+
+    'Manta ray|Glides like a giant bird|ray|kind=manta|navy|none|open|truck',
+    'Manatee|Also called a sea cow|manatee||gray|none|reef|car',
+    'Moray eel|Hides in rocky holes|eel|kind=moray teeth|green|spots|reef|dog',
+    'Mantis shrimp|Punches super fast|crust|kind=mantis|green|none|reef|hand',
+    'Mussel|Holds onto rocks with tiny threads|shell|kind=mussel|navy|none|shore|finger',
+    'Moon jellyfish|Has four rings on top|jelly|kind=moon|purple|none|open|hand',
+    'Marlin|Has a long, pointy nose|fish|shape=sword|blue|stripes|open|car',
+    'Mackerel|Has wavy stripes on its back|fish|shape=torpedo|teal|stripes|open|hand',
+    'Mandarinfish|One of the most colorful fish|fish|shape=oval small acc=orange|blue|stripes|reef|finger',
+    'Mimic octopus|Pretends to be other animals|octo|kind=mimic|brown|none|floor|cat',
+
+    'Narwhal|Has a long tooth like a unicorn horn|ceta|kind=narwhal|gray|spots|ice|car',
+    'Nautilus|Lives in a spiral shell|nautilus||cream|none|deep|hand',
+    'Nudibranch|A colorful sea slug|nudi||purple|none|reef|finger|Noodi brank|NOO-dih-brank',
+    'Nurse shark|A sleepy shark that rests on the sea floor|shark|kind=nurse|brown|none|floor|car',
+    'Needlefish|Thin like a needle|fish|shape=long needle|silver|none|open|dog',
+    'Napoleon wrasse|Has a big bump on its head|fish|shape=oval hump|teal|stripes|reef|person|Napoleon rass|nah-POH-lee-un RASS',
+
+    'Octopus|Has eight arms|octo||orange|spots|floor|cat',
+    'Orca|Swims with its family in groups called pods|ceta|kind=orca|navy|none|open|truck',
+    'Otter|Floats on its back and uses rocks as tools|otter||brown|none|kelp|dog',
+    'Oyster|Can make pearls|shell|kind=oyster|gray|none|floor|hand',
+    'Oarfish|The longest bony fish|eel|kind=oar|silver|none|deep|bus',
+    'Opah|A round fish that keeps itself warm|fish|shape=tall fins=red|pink|whitespots|open|dog|Oh pah|OH-pah',
+    'Olive ridley turtle|Comes to the beach in big groups to lay eggs|turtle||lime|none|open|cat',
+    'Ocean sunfish|The heaviest bony fish|fish|shape=mola|silver|none|open|car',
+
+    'Pufferfish|Puffs up like a balloon|fish|shape=round spikes|yellow|spots|reef|hand',
+    'Penguin|A bird that swims but cannot fly|penguin||navy|none|ice|kid',
+    'Parrotfish|Has a beak like a parrot|fish|shape=oval beak acc=pink|teal|stripes|reef|cat',
+    'Puffin|Has a colorful beak|bird|kind=puffin|navy|none|shore|cat',
+    'Porpoise|A small cousin of the dolphin|ceta|kind=porpoise|gray|none|open|person',
+    'Pelican|Scoops up fish in its big pouch|bird|kind=pelican|white|none|shore|dog',
+    "Portuguese man o' war|Floats with a sail like a balloon|jelly|kind=manowar|purple|none|open|bus|Portuguese man of war",
+    'Prawn|Like a big shrimp|crust|kind=shrimp|pink|stripes|floor|hand',
+    'Pipefish|A straight cousin of the seahorse|dragon|kind=pipe|yellow|none|reef|hand',
+
+    'Queen angelfish|Has a blue crown spot on its head|fish|shape=tall crown fins=yellow|teal|none|reef|cat',
+    'Queen conch|Has a pink shell inside|shell|kind=conch|cream|none|floor|cat|Queen konk|queen KONK',
+    'Queen triggerfish|Has blue lines on its face|fish|shape=tall facelines|teal|none|reef|cat',
+    'Quahog|A hard clam from the beach|shell|kind=clam|gray|none|shore|hand|Koh hog|KOH-hog',
+    'Queensland grouper|The biggest fish on coral reefs|fish|shape=oval bigmouth|brown|spots|reef|car',
+
+    'Reef shark|Swims around coral reefs|shark|tips|gray|none|reef|person',
+    'Remora|Sticks to sharks with a sucker on its head|fish|shape=long sucker|gray|none|open|cat',
+    'Ribbon eel|Blue and yellow, with a frilly nose|eel|kind=ribbon|blue|none|reef|dog',
+    'Right whale|Has bumpy white patches on its head|ceta|kind=right|navy|none|open|bus',
+    'Razor clam|Digs into the sand super fast|shell|kind=razor|brown|none|shore|hand',
+    'Red snapper|A red fish of warm seas|fish|shape=oval|red|none|reef|cat',
+    'Ringed seal|Has light rings on its fur|pinni|kind=ringed|gray|rings|ice|dog',
+    'Rockhopper penguin|Hops on rocks and has yellow eyebrows|penguin|kind=rock|navy|none|ice|cat',
+    'Royal gramma|Half purple and half yellow|fish|shape=oval small half=yellow fins=yellow|purple|none|reef|finger',
+
+    'Starfish|Has five arms|star||orange|spots|shore|hand',
+    'Seahorse|Seahorse dads carry the babies|seahorse||yellow|stripes|reef|hand',
+    'Stingray|Flat, and hides in the sand|ray||brown|spots|floor|dog',
+    'Squid|Squirts ink to hide|squid||pink|spots|open|cat',
+    'Sea urchin|Covered in spikes|urchin||purple|none|floor|hand',
+    'Sea lion|Barks loudly and loves to play|pinni|kind=sealion|brown|none|shore|person',
+    'Swordfish|Has a long, flat sword nose|fish|shape=sword|gray|none|open|car',
+    'Shrimp|Swims backward by flicking its tail|crust|kind=shrimp|pink|none|reef|finger',
+    'Sperm whale|Dives very deep to find squid|ceta|kind=sperm|gray|none|deep|bus',
+    'Sand dollar|Has a flower pattern on top|sanddollar||cream|none|shore|hand',
+
+    'Tuna|A super-fast swimmer|fish|shape=torpedo|navy|none|open|person',
+    'Tiger shark|Has stripes like a tiger|shark|teeth|gray|stripes|open|car',
+    'Trumpetfish|Long, with a snout like a trumpet|fish|shape=long snout=long|yellow|stripes|reef|cat',
+    'Tube worm|Lives in a tube near hot vents|tubeworm||red|none|deep|person',
+    'Tarpon|A big silver fish that jumps|fish|shape=torpedo|silver|none|open|person',
+    'Triton shell|Its shell is shaped like a trumpet|shell|kind=triton|cream|none|reef|cat',
+    'Tiger cowrie|A shiny, spotted shell|shell|kind=cowrie acc=navy|brown|spots|reef|hand|Tiger cow ree|TY-ger KOW-ree',
+    'Triggerfish|Locks its back spine to hide in holes|fish|shape=tall facelines|orange|none|reef|hand',
+
+    'Unicornfish|Has a horn on its forehead|fish|shape=oval horn|gray|none|reef|cat',
+    'Upside-down jellyfish|Rests upside down on the sea floor|jelly|kind=upside|teal|none|floor|hand',
+    'Umbrella octopus|Spreads its arms like an umbrella|octo|kind=umbrella|red|none|deep|hand',
+
+    'Vampire squid|Has a cape and glows in the dark|squid|kind=vampire|red|none|deep|hand',
+    'Viperfish|Has long, needle-like teeth|fish|shape=long teeth bigeye glow|teal|none|deep|hand',
+    'Velella|Sails on the wind, like a tiny boat|jelly|kind=velella|blue|none|open|finger|Veh lell a|veh-LEL-ah',
+    'Vaquita|The smallest porpoise|ceta|kind=porpoise vaquita|gray|none|open|dog|Va kee ta|vah-KEE-tah',
+
+    'Whale shark|The biggest fish in the world|shark|kind=whale|navy|whitespots|open|bus',
+    'Walrus|Has long tusks and whiskers|pinni|kind=walrus|brown|none|ice|car',
+    'Wobbegong|A flat shark with a frilly beard|shark|kind=wobbe|brown|spots|floor|person|Wobby gong|WOB-ee-gong',
+    'Weedy sea dragon|A seahorse cousin with leafy bits|dragon|kind=weedy|red|spots|reef|cat',
+    'Whelk|A sea snail with a twisty shell|shell|kind=whelk|cream|stripes|shore|hand',
+    'Wrasse|Some wrasses clean other fish|fish|shape=long small lat=navy|blue|none|reef|finger|Rass|RASS',
+    'Weddell seal|Lives under the Antarctic ice|pinni||gray|spots|ice|car|Weddle seal|WED-ul',
+
+    'Xenia coral|Its little hands open and close|coral|kind=xenia|purple|none|reef|coin|Zee nee a coral|ZEE-nee-ah',
+    'Xenophora|Sticks other shells onto its own|shell|kind=xeno|cream|none|floor|hand|Zeh noff or a|zeh-NOF-or-ah',
+    'Xiphias|The swordfish’s science name|fish|shape=sword|silver|stripes|open|car|Ziffy us|ZIF-ee-us',
+
+    'Yellow tang|A bright yellow reef fish|fish|shape=tall|yellow|none|reef|hand',
+    'Yellowfin tuna|Has long yellow fins|fish|shape=torpedo fins=yellow|navy|none|open|person',
+    'Yeti crab|Has hairy arms|crab|kind=yeti|white|none|deep|hand',
+    'Yellow boxfish|Yellow with black spots, shaped like a box|fish|shape=box acc=navy|yellow|spots|reef|hand',
+
+    'Zebra shark|Babies have stripes, and grown-ups have spots|shark|longtail acc=brown|yellow|spots|reef|person',
+    'Zebra moray|Has stripes like a zebra|eel|kind=moray acc=navy|white|stripes|reef|dog',
+    'Zebra lionfish|Has striped, spiky fins|fish|shape=lion acc=white|brown|stripes|reef|hand',
+    'Zooplankton|Tiny animals that drift in the sea|plankton||teal|none|open|tiny|Zo oh plankton|ZOH-oh-plank-ton',
+    'Zoanthid|Little button-shaped polyps|coral|kind=zoanthid|green|none|reef|coin|Zo an thid|zoh-AN-thid',
+  ];
+
+  const HOME = {
+    reef: ['Coral reef', '🪸'], open: ['Open ocean', '🌊'], deep: ['Deep, dark sea', '🔦'], ice: ['Icy seas', '🧊'],
+    floor: ['Sandy sea floor', '🐚'], shore: ['Seashore', '🏖️'], kelp: ['Kelp forest', '🌿'],
+  };
+  const SIZE = {
+    tiny: ['Smaller than a grain of rice', '🍚'], coin: ['As small as a coin', '🪙'], finger: ['As long as your finger', '☝️'],
+    hand: ['As big as your hand', '✋'], cat: ['As big as a cat', '🐈'], kid: ['As tall as a small child', '🧒'],
+    dog: ['As big as a dog', '🐕'], person: ['As long as a grown-up', '🧍'], car: ['As long as a car', '🚗'],
+    truck: ['As long as a truck', '🚚'], bus: ['As long as a bus', '🚌'], bus2: ['As long as 2 buses', '🚌'],
+  };
+
+  const CREATURES = ROWS.map(row => {
+    const [name, fact, plan, flags, color, pattern, home, size, say, pron] = row.split('|');
+    const f = {};
+    for (const t of flags.split(' ').filter(Boolean)) {
+      const [k, v] = t.split('=');
+      f[k] = v === undefined ? true : v;
+    }
+    let [sizeText, sizeIcon] = SIZE[size];
+    if (plan === 'ray') sizeText = sizeText.replace('As long as', 'As wide as');
+    return { name, fact, plan, f, color, pattern, home, size: [sizeText, sizeIcon], say: say || name, pron: pron || '' };
+  });
+  const byLetter = {};
+  for (const L of LETTERS) byLetter[L] = CREATURES.filter(d => d.name[0] === L).slice(0, MAX_PER_LETTER);
+
+  // ---------- Drawing: every creature is built from a few smooth shapes ----------
+
+  const INK = '#2d2440';
+  const r1 = n => Math.round(n * 10) / 10;
+  const pt = p => `${r1(p[0])} ${r1(p[1])}`;
+  const mx = p => [240 - p[0], p[1]];
+
+  function mix(a, b, t) {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch = s => Math.round(((pa >> s) & 255) * (1 - t) + ((pb >> s) & 255) * t);
+    return '#' + ((1 << 24) + (ch(16) << 16) + (ch(8) << 8) + ch(0)).toString(16).slice(1);
+  }
+
+  // Closed (or open) Catmull-Rom curve through the points.
+  function smooth(p, closed = true) {
+    const n = p.length;
+    const g = i => closed ? p[(i + n) % n] : p[Math.min(n - 1, Math.max(0, i))];
+    let d = `M${r1(p[0][0])} ${r1(p[0][1])}`;
+    for (let i = 0; i < (closed ? n : n - 1); i++) {
+      const a = g(i - 1), b = g(i), c = g(i + 1), e = g(i + 2);
+      d += `C${r1(b[0] + (c[0] - a[0]) / 6)} ${r1(b[1] + (c[1] - a[1]) / 6)} ${r1(c[0] - (e[0] - b[0]) / 6)} ${r1(c[1] - (e[1] - b[1]) / 6)} ${r1(c[0])} ${r1(c[1])}`;
+    }
+    return closed ? d + 'Z' : d;
+  }
+
+  // A soft sausage along a centre line, with a width at each point.
+  function tube(c, w) {
+    const n = c.length, L = [], R = [];
+    let t0 = [1, 0], t1 = [1, 0];
+    for (let i = 0; i < n; i++) {
+      const a = c[Math.max(0, i - 1)], b = c[Math.min(n - 1, i + 1)];
+      let tx = b[0] - a[0], ty = b[1] - a[1];
+      const m = Math.hypot(tx, ty) || 1;
+      tx /= m; ty /= m;
+      if (i === 0) t0 = [tx, ty];
+      if (i === n - 1) t1 = [tx, ty];
+      const h = w[i] / 2;
+      L.push([c[i][0] - ty * h, c[i][1] + tx * h]);
+      R.push([c[i][0] + ty * h, c[i][1] - tx * h]);
+    }
+    const s = c[0], e = c[n - 1], hs = w[0] / 2, he = w[n - 1] / 2;
+    const pts = [...L];
+    if (he > 1.5) pts.push([e[0] + t1[0] * he * .8, e[1] + t1[1] * he * .8]);
+    pts.push(...R.reverse());
+    if (hs > 1.5) pts.push([s[0] - t0[0] * hs * .8, s[1] - t0[1] * hs * .8]);
+    return smooth(pts);
+  }
+
+  const ring = (cx, cy, rx, ry, k = 12, wob = 0, rot = 0) => Array.from({ length: k }, (_, i) => {
+    const a = i / k * 6.2832 + rot, r = 1 + (i % 2 ? -wob : wob);
+    return [cx + rx * r * Math.cos(a), cy + ry * r * Math.sin(a)];
+  });
+  const ellipse = (cx, cy, rx, ry, k = 12, wob = 0) => smooth(ring(cx, cy, rx, ry, k, wob));
+
+  function frame(cx, cy, ang) {
+    const c = Math.cos(ang), s = Math.sin(ang);
+    return (x, y) => [cx + x * c - y * s, cy + x * s + y * c];
+  }
+  const HEADS = {
+    round: [[-1, .1], [-.8, -.7], [-.2, -1], [.45, -.85], [.95, -.25], [1, .3], [.6, .75], [-.2, .9], [-.8, .6]],
+    croc: [[-1, 0], [-.75, -1], [-.1, -.9], [.5, -.45], [1, -.2], [1.02, .35], [.5, .6], [-.3, .95], [-.85, .6]],
+    beak: [[-1, 0], [-.7, -1], [0, -.9], [.5, -.4], [1.05, .1], [.5, .5], [-.3, .9], [-.85, .6]],
+  };
+  const head = (at, L, H, kind = 'round') => smooth(HEADS[kind].map(([x, y]) => at(x * L / 2, y * H / 2)));
+  const wave = (x0, x1, y, amp = 3, n = 8) => Array.from({ length: n + 1 }, (_, i) => [x0 + (x1 - x0) * i / n, y + (i % 2 ? -amp : amp)]);
+
+  function seeded(str) {
+    let h = 2166136261;
+    for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      h = Math.imul(h ^ (h >>> 15), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return ((h ^= h >>> 16) >>> 0) / 4294967296;
+    };
+  }
+
+  const PLANS = {
+    fish(A, f) {
+      const C = A.C, sh = f.shape || 'oval';
+      let [L, H, cx, cy] = {
+        oval: [126, 70, 124, 86], tall: [92, 94, 130, 84], long: [176, 32, 118, 88], round: [92, 84, 130, 88],
+        torpedo: [156, 54, 126, 86], flat: [156, 42, 120, 128], sword: [128, 46, 100, 90], angler: [104, 88, 128, 90],
+        lion: [100, 58, 136, 90], mola: [88, 90, 140, 85], flying: [136, 40, 134, 98], lobe: [140, 58, 128, 88], box: [100, 70, 128, 88],
+      }[sh];
+      if (f.small) { L *= .8; H *= .8; }
+      const l = L / 2, h = H / 2, fin = C.fin;
+      const tail = { tall: 'fan', round: 'fan', box: 'fan', angler: 'fan', flat: 'fan', lion: 'fan', torpedo: 'moon', sword: 'moon', mola: 'none', lobe: 'lobe' }[sh] || 'fork';
+      const tx = cx - l + 5, T = Math.max(20, Math.min(38, H * .5));
+      const tails = {
+        fork: [[tx + 6, cy - 5], [tx - T * .7, cy - T], [tx - T * .98, cy - T * .82], [tx - T * .5, cy], [tx - T * .98, cy + T * .82], [tx - T * .7, cy + T], [tx + 6, cy + 5]],
+        moon: [[tx + 6, cy - 4], [tx - T * .45, cy - T * 1.1], [tx - T * .75, cy - T * 1.15], [tx - T * .3, cy], [tx - T * .75, cy + T * 1.15], [tx - T * .45, cy + T * 1.1], [tx + 6, cy + 4]],
+        fan: [[tx + 6, cy - 6], [tx - T * .6, cy - T * .9], [tx - T * .98, cy - T * .45], [tx - T * 1.05, cy], [tx - T * .98, cy + T * .45], [tx - T * .6, cy + T * .9], [tx + 6, cy + 6]],
+        lobe: [[tx + 6, cy - 6], [tx - T * .5, cy - T * .8], [tx - T * .7, cy - T * .2], [tx - T * 1.1, cy - 4], [tx - T * 1.1, cy + 4], [tx - T * .7, cy + T * .2], [tx - T * .5, cy + T * .8], [tx + 6, cy + 6]],
+      };
+      if (tails[tail]) A.back(A.part(smooth(tails[tail]), fin));
+      // Fins on the back and belly.
+      if (sh === 'tall') {
+        A.back(A.part(smooth([[cx - l * .45, cy - h * .7], [cx - l * 1.05, cy - h - 30], [cx - l * .8, cy - h - 26], [cx + l * .25, cy - h * .9]]), fin));
+        A.back(A.part(smooth([[cx - l * .45, cy + h * .7], [cx - l * 1.05, cy + h + 28], [cx - l * .8, cy + h + 24], [cx + l * .2, cy + h * .9]]), fin));
+      } else if (sh === 'mola') {
+        A.back(A.part(smooth([[cx - l * .55, cy - h * .6], [cx - l * .7, cy - h - 30], [cx - l * .35, cy - h - 27], [cx - l * .15, cy - h * .75]]), fin));
+        A.back(A.part(smooth([[cx - l * .55, cy + h * .6], [cx - l * .7, cy + h + 30], [cx - l * .35, cy + h + 27], [cx - l * .15, cy + h * .75]]), fin));
+        A.back(A.part(smooth([[cx - l * .8, cy - h * .55], [cx - l * 1.15, cy - h * .3], [cx - l * 1.2, cy], [cx - l * 1.15, cy + h * .3], [cx - l * .8, cy + h * .55]]), fin));
+      } else if (sh === 'flat') {
+        A.back(A.part(ellipse(cx, cy, l + 6, h + 7, 14), fin));
+      } else if (sh === 'lion') {
+        for (let i = 0; i < 7; i++) {
+          const x = cx - l * .6 + i * l * .2;
+          A.back(A.part(tube([[x, cy - h * .6], [x - 9, cy - h - 30 + Math.abs(i - 3) * 4]], [5, 1.4]), fin, 2));
+        }
+        A.back(A.part(smooth([[cx - l * .5, cy + h * .7], [cx - l * .8, cy + h + 16], [cx - l * .3, cy + h + 12], [cx - l * .1, cy + h * .8]]), fin));
+      } else {
+        const dh = sh === 'sword' ? 30 : sh === 'long' || sh === 'round' || sh === 'box' ? 12 : 20;
+        const dx = sh === 'sword' ? l * .5 : 0;
+        A.back(A.part(smooth([[cx - l * .4 + dx, cy - h * .75], [cx - l * .2 + dx, cy - h - dh], [cx + l * .05 + dx, cy - h - dh * .8], [cx + l * .25 + dx, cy - h * .9]]), fin));
+        if (sh !== 'flying') A.back(A.part(smooth([[cx - l * .35, cy + h * .75], [cx - l * .25, cy + h + dh * .6], [cx - l * .02, cy + h + dh * .45], [cx + l * .1, cy + h * .85]]), fin));
+      }
+      if (sh === 'flying') A.back(A.part(smooth([[cx + l * .2, cy - h * .2], [cx - l * .3, cy - h - 34], [cx - l * .65, cy - h - 30], [cx - l * .1, cy]]), C.wing));
+      if (f.spikes) {
+        for (const [x, y] of ring(cx, cy, l + 2, h + 2, 16)) {
+          const a = Math.atan2(y - cy, x - cx);
+          A.back(A.part(smooth([[x - Math.sin(a) * 4, y + Math.cos(a) * 4], [x + Math.cos(a) * 9, y + Math.sin(a) * 9], [x + Math.sin(a) * 4, y - Math.cos(a) * 4]]), C.horn, 1.8));
+        }
+      }
+      // Body.
+      let body;
+      if (sh === 'box') body = smooth([[cx + l, cy + 2], [cx + l * .85, cy - h * .9], [cx - l * .55, cy - h], [cx - l, cy - h * .45], [cx - l, cy + h * .45], [cx - l * .55, cy + h], [cx + l * .85, cy + h * .9]]);
+      else if (sh === 'flat') body = ellipse(cx, cy, l, h, 14);
+      else if (sh === 'angler') body = smooth([[cx + l, cy - h * .05], [cx + l * .6, cy - h * .85], [cx, cy - h], [cx - l * .6, cy - h * .7], [cx - l, cy - h * .2], [cx - l, cy + h * .2], [cx - l * .6, cy + h * .75], [cx, cy + h], [cx + l * .65, cy + h * .9], [cx + l * 1.05, cy + h * .45]]);
+      else body = smooth([[cx + l, cy + h * .08], [cx + l * .62, cy - h * .78], [cx, cy - h], [cx - l * .6, cy - h * .62], [cx - l, cy - h * .2], [cx - l, cy + h * .2], [cx - l * .6, cy + h * .62], [cx, cy + h], [cx + l * .62, cy + h * .72]]);
+      A.sil(body);
+      if (f.hump) A.sil(smooth([[cx + l * .15, cy - h * .9], [cx + l * .45, cy - h - 14], [cx + l * .8, cy - h * .45]]));
+      if (f.snout === 'long') A.sil(tube([[cx + l - 4, cy + 1], [cx + l + 30, cy + 2]], [12, 9]));
+      if (f.snout === 'short') A.sil(tube([[cx + l - 6, cy + 2], [cx + l + 12, cy + 6]], [16, 12]));
+      if (f.needle) A.sil(tube([[cx + l - 4, cy], [cx + l + 36, cy + 2]], [9, 1.5]));
+      if (sh === 'sword') A.sil(tube([[cx + l - 6, cy - 2], [cx + l + 58, cy - 1]], [11, 2]));
+      A.belly(ellipse(cx + l * .1, cy + h * .62, l * .82, h * .5, 12));
+      if (f.half) A.clip(`<rect x="${r1(cx - l - 20)}" y="${r1(cy - h - 20)}" width="${r1(l * 1.05 + 20)}" height="${r1(H + 40)}" fill="${HUES[f.half][0]}"/>`);
+      if (f.lat) A.clip(`<path d="M${r1(cx - l)} ${r1(cy - 2)} Q${r1(cx)} ${r1(cy - 6)} ${r1(cx + l * .7)} ${r1(cy - h * .3)}" stroke="${HUES[f.lat][0]}" stroke-width="${f.small ? 5 : 7}" fill="none" stroke-linecap="round"/>`);
+      if (f.bands) {
+        for (const x of [cx + l * .42, cx - l * .08, cx - l * .62]) {
+          const d = `M${r1(x)} ${r1(cy - h - 10)} Q${r1(x - 9)} ${r1(cy)} ${r1(x)} ${r1(cy + h + 10)}`;
+          A.clip(`<path d="${d}" stroke="${INK}" stroke-width="15" fill="none"/><path d="${d}" stroke="#ffffff" stroke-width="10" fill="none"/>`);
+        }
+      }
+      if (f.facelines) {
+        A.clip(`<path d="M${r1(cx + l * .3)} ${r1(cy - h * .55)} Q${r1(cx + l * .6)} ${r1(cy - h * .1)} ${r1(cx + l * .95)} ${r1(cy + h * .2)}M${r1(cx + l * .2)} ${r1(cy - h * .2)} Q${r1(cx + l * .5)} ${r1(cy + h * .2)} ${r1(cx + l * .85)} ${r1(cy + h * .45)}" stroke="#3fb7ff" stroke-width="3.5" fill="none" stroke-linecap="round"/>`);
+      }
+      A.box([cx - l * .6, cy - h * .8, cx + l * .45, cy + h * .5]);
+      // Side fins.
+      if (sh === 'flying') A.near(A.part(smooth([[cx + l * .25, cy], [cx - l * .2, cy + h + 26], [cx - l * .55, cy + h + 22], [cx - l * .05, cy + h * .4]]), C.wing));
+      else if (sh === 'lion') A.near(A.part(smooth([[cx + l * .2, cy + h * .2], [cx - l * .3, cy + h + 26], [cx + l * .05, cy + h + 32], [cx + l * .36, cy + h * .5]]), fin));
+      else if (sh === 'lobe') {
+        A.near(A.part(tube([[cx + l * .2, cy + h * .55], [cx + l * .05, cy + h + 12], [cx - 6, cy + h + 20]], [11, 8, 9]), fin));
+        A.near(A.part(tube([[cx - l * .4, cy + h * .55], [cx - l * .55, cy + h + 10], [cx - l * .7, cy + h + 16]], [10, 7, 8]), fin));
+      } else if (sh !== 'flat') A.near(A.part(smooth([[cx + l * .25, cy + h * .1], [cx - l * .02, cy + h * .5], [cx + l * .08, cy + h * .62], [cx + l * .34, cy + h * .32]]), fin, 2.5));
+      // Extras.
+      if (f.horns) {
+        A.top(A.part(tube([[cx + l * .72, cy - h * .78], [cx + l * 1.02, cy - h - 12]], [7, 1.5]), C.horn, 2));
+        A.top(A.part(tube([[cx - l * .78, cy + h * .78], [cx - l * 1.05, cy + h + 9]], [6, 1.4]), C.horn, 2));
+      }
+      if (f.horn) A.top(A.part(tube([[cx + l * .6, cy - h * .55], [cx + l + 14, cy - h * .72]], [10, 2.5]), C.accent, 2.4));
+      if (f.crown) A.top(`<circle cx="${r1(cx + l * .22)}" cy="${r1(cy - h * .68)}" r="6.5" fill="#1d4fb8" stroke="#86d8ff" stroke-width="2.4"/>`);
+      if (f.eyespot) A.top(`<circle cx="${r1(cx - l * .55)}" cy="${r1(cy - h * .32)}" r="7" fill="${INK}" stroke="#ffffff" stroke-width="2.4"/>`);
+      if (f.spot) A.top(`<circle cx="${r1(cx - l * .05)}" cy="${r1(cy)}" r="9" fill="${INK}" stroke="#f3e7c9" stroke-width="2.6"/>`);
+      if (f.sucker) A.top(A.part(ellipse(cx + l * .25, cy - h * .9, 18, 5, 10), C.belly, 1.8) + `<path d="M${r1(cx + l * .12)} ${r1(cy - h * .9)}h${r1(l * .26)}" stroke="${C.ol}" stroke-width="1.6" stroke-dasharray="2 3"/>`);
+      if (f.lumpy) for (const [x, y] of ring(cx, cy - 4, l * .55, h * .5, 7)) A.top(`<circle cx="${r1(x)}" cy="${r1(y)}" r="3.4" fill="${C.accent}" stroke="${C.ol}" stroke-width="1.5"/>`);
+      if (f.glow) for (let i = 0; i < 6; i++) A.top(`<circle cx="${r1(cx - l * .6 + i * l * .24)}" cy="${r1(cy + h * .55)}" r="4.6" fill="#9ff3ff" opacity=".35"/><circle cx="${r1(cx - l * .6 + i * l * .24)}" cy="${r1(cy + h * .55)}" r="2.2" fill="#d8fbff"/>`);
+      if (f.lure) {
+        const b = [cx + l * .85, cy - h - 22];
+        A.top(A.part(tube([[cx + l * .3, cy - h * .85], [cx + l * .5, cy - h - 22], b], [4, 3, 2]), C.body, 2));
+        A.top(`<circle cx="${r1(b[0] + 3)}" cy="${r1(b[1] + 3)}" r="11" fill="#fff6a6" opacity=".35"/><circle cx="${r1(b[0] + 3)}" cy="${r1(b[1] + 3)}" r="5.5" fill="#ffe46b" stroke="${C.ol}" stroke-width="2"/>`);
+      }
+      if (f.beak) A.top(A.part(smooth([[cx + l * .86, cy - h * .2], [cx + l * 1.05, cy], [cx + l * .9, cy + h * .3], [cx + l * .78, cy + h * .08]]), '#e8fff7', 2));
+      if (f.barbel) A.top(`<path d="M${r1(cx + l * .8)} ${r1(cy + h * .5)} q-2 10 -7 14" stroke="${C.ol}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+      // Face.
+      if (sh === 'flat') {
+        A.eye(cx + l * .48, cy - h * .45, 5.5);
+        A.eye(cx + l * .68, cy - h * .58, 5.5);
+        A.smile([cx + l * .82, cy - h * .05], [cx + l * .97, cy + h * .1], 2);
+        return;
+      }
+      A.top(`<path d="M${r1(cx + l * .4)} ${r1(cy - h * .45)} Q${r1(cx + l * .3)} ${r1(cy)} ${r1(cx + l * .4)} ${r1(cy + h * .45)}" stroke="${C.ol}" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".45"/>`);
+      const er = f.bigeye ? Math.min(10, h * .4) : Math.max(4.5, Math.min(8, h * .26));
+      A.eye(cx + l * .6, cy - h * .22, er);
+      if (f.bigmouth || f.teeth) A.smile([cx + l * .52, cy + h * .32], [cx + l * .99, cy + h * .14], 5, f.teeth ? [.3, .5, .7, .88] : null);
+      else A.smile([cx + l * .78, cy + h * .32], [cx + l * .97, cy + h * .18], 2);
+    },
+
+    shark(A, f) {
+      const C = A.C, k = f.kind || 'std';
+      const dy = k === 'nurse' || k === 'wobbe' ? 30 : 0, Y = y => y + dy;
+      const w = k === 'whale' ? 8 : 0;
+      A.sil(smooth(k === 'whale'
+        ? [[226, 84], [222, 70], [162, 56], [108, 60], [62, 78], [36, 87], [36, 95], [70, 108], [122, 118], [172, 118], [218, 106], [226, 98]]
+        : [[224, Y(92)], [206, Y(74)], [162, Y(62)], [108, Y(64)], [62, Y(78)], [36, Y(87)], [36, Y(95)], [70, Y(106)], [122, Y(112)], [172, Y(110)], [208, Y(104)]]));
+      if (f.longtail) A.sil(smooth([[44, 86], [2, 78], [-6, 88], [2, 98], [44, 96]]));
+      else A.sil(smooth([[44, Y(84)], [20, Y(50)], [12, Y(48)], [20, Y(82)], [26, Y(90)], [12, Y(114)], [20, Y(116)], [44, Y(96)]]));
+      const low = k === 'nurse' || k === 'wobbe', dx = k === 'nurse' ? -30 : 0, dh = low ? 18 : 34;
+      A.sil(smooth([[122 + dx, Y(68 - w)], [134 + dx, Y(66 - dh - w)], [144 + dx, Y(68 - dh - w)], [154 + dx, Y(66 - w)]]));
+      A.sil(smooth([[68, Y(80)], [72, Y(68)], [80, Y(70)], [84, Y(80)]]));
+      if (k === 'hammer') A.sil(tube([[204, 56], [208, 122]], [18, 18]));
+      if (k === 'goblin') A.sil(tube([[200, 80], [236, 84]], [14, 7]));
+      A.belly(k === 'whale' ? smooth([[60, 102], [120, 112], [218, 102], [200, 118], [120, 124], [60, 110]]) : smooth([[60, Y(100)], [120, Y(108)], [204, Y(100)], [190, Y(112)], [120, Y(120)], [60, Y(110)]]));
+      A.box([70, Y(62), 200, Y(98)]);
+      A.near(A.group([low ? smooth([[170, Y(108)], [140, Y(124)], [156, Y(130)], [188, Y(112)]]) : smooth([[170, Y(104)], [142, Y(138)], [154, Y(140)], [186, Y(108)]])], C.body));
+      if (f.tips) {
+        A.top(`<path d="${smooth([[129, 40], [134, 32], [144, 34], [142, 43]])}" fill="${INK}"/>`);
+        A.top(`<path d="${smooth([[146, 130], [142, 138], [154, 140], [156, 132]])}" fill="${INK}"/>`);
+      }
+      let g = '';
+      for (const x of [170, 176, 182, 188]) g += `M${x} ${Y(80 - w * .5)} q-3 8 0 16`;
+      A.top(`<path d="${g}" stroke="${C.ol}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"/>`);
+      if (k === 'wobbe') for (let i = 0; i < 6; i++) A.top(A.part(ellipse(196 + i * 5, Y(102) - i, 3.4, 4.4, 8), C.accent, 1.6));
+      if (k === 'nurse') A.top(`<path d="M214 ${Y(96)} q0 7 -3 11M220 ${Y(95)} q0 7 -2 11" stroke="${C.ol}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`);
+      if (k === 'hammer') {
+        A.eye(205, 56, 4.8);
+        A.eye(208, 120, 4.8);
+        A.smile([190, 104], [204, 103], 2);
+      } else if (k === 'whale') {
+        A.eye(196, 80, 4);
+        A.smile([200, 100], [225, 96], 2);
+      } else {
+        A.eye(194, Y(82), 5.5);
+        A.smile([196, Y(98)], [214, Y(96)], 2.5, f.teeth ? [.3, .55, .8] : null);
+      }
+    },
+
+    ray(A, f) {
+      const C = A.C, k = f.kind || 'sting';
+      if (k === 'manta') {
+        A.sil(smooth([[120, 56], [152, 62], [224, 94], [172, 104], [134, 118], [106, 118], [68, 104], [16, 94], [88, 62]]));
+        A.sil(tube([[110, 62], [102, 44]], [13, 9]));
+        A.sil(tube([[130, 62], [138, 44]], [13, 9]));
+        A.sil(tube([[120, 112], [121, 160]], [7, 2]));
+        A.clip(`<path d="${smooth([[74, 82], [108, 72], [100, 90]])}" fill="${C.belly}"/><path d="${smooth([[166, 82], [132, 72], [140, 90]])}" fill="${C.belly}"/>`);
+        A.eye(98, 70, 5);
+        A.eye(142, 70, 5);
+        A.smile([111, 64], [129, 64], 3);
+      } else if (k === 'eagle') {
+        A.sil(smooth([[120, 52], [148, 60], [218, 84], [162, 100], [126, 114], [114, 114], [78, 100], [22, 84], [92, 60]]));
+        A.sil(tube([[120, 60], [120, 40]], [26, 20]));
+        A.sil(tube([[120, 110], [122, 166]], [6, 1.5]));
+        A.eye(106, 60, 5);
+        A.eye(134, 60, 5);
+        A.smile([113, 44], [127, 44], 2.5);
+      } else {
+        const el = k === 'electric';
+        A.sil(ellipse(120, 84, el ? 54 : 64, el ? 48 : 50, 14));
+        if (el) {
+          A.sil(tube([[120, 124], [120, 156]], [20, 14]));
+          A.sil(smooth([[108, 156], [120, 148], [132, 156], [120, 168]]));
+        } else {
+          A.sil(tube([[120, 130], [123, 168]], [10, 2]));
+          A.top(A.part(tube([[121, 146], [128, 158]], [4, 1]), C.horn, 1.6));
+        }
+        A.eye(104, 70, 5.5);
+        A.eye(136, 70, 5.5);
+        A.smile([110, 84], [130, 84], 3);
+        A.cheek(98, 82); A.cheek(142, 82);
+      }
+      A.box([60, 60, 180, 110]);
+    },
+
+    ceta(A, f) {
+      const C = A.C, k = f.kind || 'dolphin';
+      const O = {
+        dolphin: [[230, 90], [214, 84], [202, 70], [170, 62], [120, 64], [76, 76], [48, 88], [48, 96], [80, 106], [140, 110], [190, 104], [214, 96]],
+        porpoise: [[222, 90], [214, 74], [196, 64], [160, 62], [116, 66], [76, 78], [48, 88], [48, 96], [80, 106], [140, 110], [190, 106], [214, 100]],
+        orca: [[224, 90], [216, 72], [194, 60], [154, 58], [110, 62], [72, 76], [46, 88], [46, 96], [80, 108], [140, 114], [194, 108], [218, 100]],
+        beluga: [[220, 94], [214, 74], [196, 58], [160, 62], [110, 70], [68, 82], [46, 92], [48, 98], [84, 112], [140, 118], [190, 112], [214, 104]],
+        narwhal: [[206, 94], [200, 76], [184, 64], [150, 64], [104, 70], [64, 82], [44, 92], [46, 98], [80, 110], [134, 116], [180, 110], [200, 102]],
+        blue: [[228, 90], [214, 80], [180, 72], [120, 70], [74, 78], [44, 88], [44, 94], [82, 104], [150, 108], [200, 104], [222, 96]],
+        humpback: [[224, 92], [212, 78], [180, 66], [130, 64], [84, 74], [48, 88], [48, 96], [84, 108], [150, 114], [198, 108], [220, 100]],
+        gray: [[224, 90], [214, 78], [184, 68], [130, 66], [84, 76], [48, 88], [48, 96], [84, 106], [150, 110], [198, 106], [220, 98]],
+        right: [[222, 94], [212, 70], [186, 60], [140, 60], [94, 70], [52, 88], [52, 96], [88, 112], [150, 118], [198, 112], [218, 104]],
+        sperm: [[228, 76], [224, 60], [196, 54], [150, 58], [100, 66], [56, 82], [44, 90], [46, 96], [84, 106], [150, 108], [196, 100], [220, 94], [228, 86]],
+      }[k];
+      const fx = Math.min(...O.map(p => p[0]));
+      const fy = O.filter(p => p[0] === fx).reduce((s, p, _, a) => s + p[1] / a.length, 0);
+      A.sil(smooth(O));
+      A.sil(smooth([[fx + 6, fy - 3], [fx - 22, fy - 18], [fx - 34, fy - 18], [fx - 20, fy], [fx - 34, fy + 18], [fx - 22, fy + 18], [fx + 6, fy + 3]]));
+      const dorsal = {
+        dolphin: [[124, 66], [114, 38], [134, 52], [150, 64]], porpoise: [[120, 66], [126, 44], [140, 52], [146, 64]],
+        orca: [[122, 62], [126, 16], [136, 20], [150, 60]], blue: [[80, 78], [76, 68], [86, 72], [92, 78]], humpback: [[84, 76], [88, 66], [98, 70], [102, 76]],
+      }[k];
+      if (dorsal) A.sil(smooth(dorsal));
+      if (k === 'gray') for (const x of [76, 88, 100]) A.sil(ellipse(x, 76 - (100 - x) * .1, 5, 4, 8));
+      if (k === 'orca') {
+        A.belly(smooth([[60, 100], [110, 104], [150, 96], [196, 100], [214, 100], [194, 110], [140, 116], [78, 110]]));
+        A.clip(`<path d="${ellipse(180, 74, 15, 6, 10)}" fill="#ffffff"/><path d="${ellipse(110, 62, 20, 7, 10)}" fill="#b9c1d3"/>`);
+      } else A.belly(smooth([[70, 100], [140, 108], [214, 98], [200, 112], [140, 122], [76, 112]]));
+      if (k === 'blue' || k === 'humpback') {
+        let g = '';
+        for (let i = 0; i < 5; i++) g += `M${160 + i * 6} ${104 + i * .6} L${214 - i * 2} ${98 + i * 1.6}`;
+        A.clip(`<path d="${g}" stroke="${C.ol}" stroke-width="1.8" opacity=".3" fill="none"/>`);
+      }
+      if (k === 'sperm') A.clip(`<path d="M120 70 q10 6 20 0 t20 0 M100 84 q10 6 20 0 t20 0 t20 0" stroke="${C.ol}" stroke-width="2" opacity=".25" fill="none"/>`);
+      A.box([60, 62, 200, 100]);
+      if (k === 'humpback') A.near(A.part(smooth([[170, 104], [112, 146], [122, 152], [186, 112]]), C.belly));
+      else A.near(A.group([smooth([[176, 102], [156, 128], [170, 126], [188, 104]])], C.body));
+      if (k === 'narwhal') A.top(A.part(tube([[202, 84], [238, 58]], [6, 2]), C.horn, 2) + `<path d="M210 79 l3 3 M218 73 l3 3 M226 67 l3 3" stroke="${C.ol}" stroke-width="1.6"/>`);
+      if (k === 'humpback') for (const [x, y] of [[206, 80], [198, 74], [214, 86], [190, 70]]) A.top(`<circle cx="${x}" cy="${y}" r="2.8" fill="${C.far}" stroke="${C.ol}" stroke-width="1.4"/>`);
+      if (k === 'right') for (const [x, y, r] of [[204, 68, 5], [194, 63, 4], [214, 78, 4], [210, 92, 3.5]]) A.top(A.part(ellipse(x, y, r, r * .8, 8, .12), '#f2ecdc', 1.6));
+      if (k === 'vaquita' || f.vaquita) A.top(`<ellipse cx="196" cy="80" rx="9" ry="7" fill="${C.ol}" opacity=".85"/>`);
+      const face = {
+        dolphin: [[200, 82, 5.5], [206, 92], [228, 91], 2], porpoise: [[196, 80, 5.5], [204, 94], [220, 92], 2], orca: [[190, 80, 5], [198, 96], [222, 94], 2],
+        beluga: [[190, 80, 5.5], [200, 98], [218, 96], 3], narwhal: [[182, 80, 5], [188, 96], [204, 94], 2], blue: [[194, 84, 4.5], [180, 94], [226, 92], 4],
+        humpback: [[190, 86, 4.5], [182, 98], [222, 96], 5], gray: [[192, 84, 4.5], [184, 94], [222, 92], 3], right: [[186, 90, 4.5], [168, 80], [220, 96], 14],
+        sperm: [[184, 90, 4.5], [196, 100], [224, 92], 2],
+      }[k];
+      A.eye(...face[0]);
+      A.smile(face[1], face[2], face[3]);
+      const spout = { blue: [190, 72], humpback: [186, 66], gray: [186, 68], right: [180, 60], sperm: [222, 56] }[k];
+      if (spout) {
+        const [x, y] = spout;
+        A.top(`<path d="${smooth([[x, y], [x - 12, y - 20], [x - 6, y - 16], [x - 2, y - 30], [x + 2, y - 16], [x + 9, y - 22]])}" fill="#ffffff" opacity=".9" stroke="#9ccfe8" stroke-width="1.5"/>`);
+      }
+    },
+
+    pinni(A, f) {
+      const C = A.C, k = f.kind || 'seal';
+      if (k === 'sealion') {
+        A.far(A.group([smooth([[150, 118], [140, 142], [160, 144], [166, 120]])], C.far));
+        A.sil(smooth([[224, 58], [216, 42], [200, 36], [186, 42], [178, 60], [170, 90], [124, 110], [74, 122], [46, 130], [64, 142], [132, 142], [182, 136], [198, 110], [208, 74], [222, 68]]));
+        A.sil(smooth([[52, 128], [22, 120], [16, 130], [26, 138], [18, 146], [30, 148], [56, 140]]));
+        A.belly(smooth([[184, 64], [200, 104], [182, 134], [160, 126], [178, 96]]));
+        A.box([70, 100, 170, 130]);
+        A.near(A.group([smooth([[176, 112], [168, 144], [192, 146], [192, 116]])], C.body));
+        A.top(A.part(smooth([[190, 44], [185, 34], [195, 39]]), C.body, 2));
+        A.eye(205, 49, 5.5);
+        A.top(`<ellipse cx="222" cy="58" rx="3.4" ry="2.6" fill="${INK}"/>`);
+        A.whiskers(216, 64);
+        A.smile([212, 66], [221, 64], 2);
+        return;
+      }
+      if (k === 'walrus') {
+        A.sil(smooth([[214, 100], [212, 76], [194, 62], [168, 64], [138, 76], [90, 90], [50, 106], [34, 124], [58, 140], [140, 142], [194, 132], [212, 116]]));
+        A.sil(smooth([[40, 124], [12, 114], [6, 124], [16, 132], [8, 142], [20, 144], [46, 136]]));
+        A.box([60, 80, 180, 130]);
+        A.near(A.group([smooth([[166, 120], [150, 142], [172, 144], [182, 124]])], C.body));
+        A.top(A.part(tube([[204, 108], [202, 142]], [8, 3]), C.horn, 2.4));
+        A.top(A.part(tube([[214, 108], [215, 140]], [8, 3]), C.horn, 2.4));
+        A.top(A.part(smooth([[196, 98], [208, 90], [222, 96], [222, 110], [208, 114], [196, 110]]), C.belly, 2.4));
+        let s = '';
+        for (const [x, y] of [[204, 100], [210, 104], [216, 100], [206, 107], [214, 108]]) s += `<circle cx="${x}" cy="${y}" r="1.2" fill="${C.ol}"/>`;
+        A.top(s + `<path d="M170 74 q6 8 2 18 M160 78 q6 8 2 18" stroke="${C.ol}" stroke-width="1.8" fill="none" opacity=".35"/>`);
+        A.eye(192, 80, 4.2);
+        return;
+      }
+      const harp = k === 'harp';
+      A.sil(smooth(harp
+        ? [[214, 102], [210, 80], [192, 70], [172, 74], [150, 90], [104, 104], [62, 116], [44, 124], [62, 138], [120, 140], [180, 130], [208, 116]]
+        : [[216, 100], [212, 80], [198, 70], [180, 72], [162, 88], [112, 102], [64, 114], [40, 122], [58, 136], [120, 138], [180, 128], [208, 114]]));
+      A.sil(smooth([[46, 122], [16, 108], [8, 116], [18, 126], [8, 136], [20, 140], [48, 134]]));
+      if (k === 'elephant') A.sil(tube([[206, 88], [222, 94], [226, 108], [220, 116]], [18, 15, 12, 10]));
+      A.belly(smooth([[60, 128], [120, 132], [196, 120], [182, 134], [120, 142], [60, 138]]));
+      A.box([60, 76, 196, 124]);
+      A.near(A.group([smooth([[166, 118], [150, 140], [170, 142], [182, 122]])], C.body));
+      if (harp) for (const [x, y] of ring(130, 104, 70, 26, 14)) if (y < 104) A.top(`<circle cx="${r1(x)}" cy="${r1(y - 2)}" r="4" fill="#ffffff"/>`);
+      A.eye(k === 'elephant' ? 192 : 198, 84, harp ? 8 : 6.5);
+      if (k !== 'elephant') A.top(`<ellipse cx="214" cy="92" rx="3.4" ry="2.6" fill="${INK}"/>`);
+      A.whiskers(208, 98);
+      A.smile([203, 102], [213, 100], 2);
+    },
+
+    otter(A) {
+      const C = A.C;
+      A.sil(tube([[26, 106], [56, 100], [96, 94], [140, 90], [168, 88]], [8, 14, 34, 40, 34]));
+      A.sil(smooth([[168, 74], [180, 60], [200, 58], [214, 68], [216, 86], [206, 98], [186, 100], [170, 92]]));
+      A.sil(ellipse(178, 62, 6, 6, 8));
+      A.sil(ellipse(208, 60, 6, 6, 8));
+      A.belly(smooth([[78, 84], [130, 74], [170, 76], [160, 90], [112, 94], [80, 94]]));
+      A.near(A.group([tube([[66, 96], [58, 80]], [12, 14]), tube([[84, 92], [80, 78]], [12, 14])], C.far));
+      A.top(A.part(ellipse(138, 72, 13, 8, 12), '#e6def3', 2.4) + `<path d="M130 72 h16 M132 68 h12" stroke="${C.ol}" stroke-width="1.6" opacity=".5"/>`);
+      A.top(A.part(ellipse(124, 78, 7, 6, 8), C.far, 2.2) + A.part(ellipse(152, 78, 7, 6, 8), C.far, 2.2));
+      A.top(A.part(ellipse(198, 86, 12, 9, 10), C.belly, 2.2));
+      A.top(`<ellipse cx="201" cy="80" rx="4" ry="3" fill="${INK}"/>`);
+      A.whiskers(200, 88);
+      A.eye(186, 72, 4.5);
+      A.eye(208, 70, 4.5);
+      A.smile([194, 92], [204, 92], 2);
+      A.top(`<path d="${smooth([[-10, 104], ...wave(0, 240, 102, 3, 10), [250, 104], [250, 180], [-10, 180]])}" fill="#5fb4a7" opacity=".55"/>`);
+    },
+
+    manatee(A, f) {
+      const C = A.C;
+      A.sil(smooth([[212, 100], [204, 80], [182, 72], [140, 70], [92, 76], [62, 90], [54, 104], [76, 118], [132, 122], [182, 118], [206, 110]]));
+      A.sil(f.dugong ? smooth([[58, 98], [30, 82], [20, 84], [32, 100], [20, 116], [30, 118]]) : ellipse(42, 100, 22, 17, 12));
+      A.belly(smooth([[70, 112], [130, 118], [200, 110], [180, 122], [120, 128], [76, 120]]));
+      A.box([70, 74, 190, 110]);
+      A.near(A.group([smooth([[168, 112], [158, 136], [176, 134], [182, 114]])], C.body));
+      A.top(A.part(ellipse(209, 100, 11, 10, 10), C.belly, 2.2));
+      let s = '';
+      for (const [x, y] of [[206, 100], [212, 98], [210, 104], [216, 103]]) s += `<circle cx="${x}" cy="${y}" r="1.2" fill="${C.ol}"/>`;
+      A.top(s + `<path d="M150 76 q6 6 0 12 M130 74 q6 6 0 12" stroke="${C.ol}" stroke-width="1.8" fill="none" opacity=".3"/>`);
+      A.top(`<circle cx="214" cy="90" r="1.6" fill="${INK}"/><circle cx="208" cy="89" r="1.6" fill="${INK}"/>`);
+      A.eye(192, 86, 4);
+      A.smile([202, 108], [212, 107], 1.5);
+    },
+
+    turtle(A, f) {
+      const C = A.C, lb = f.kind === 'leather';
+      A.far(A.group([smooth([[150, 72], [176, 44], [190, 38], [186, 52], [164, 80]]), smooth([[78, 84], [60, 70], [54, 78], [70, 92]])], C.far));
+      A.sil(tube([[166, 90], [186, 86]], [22, 18]));
+      const at = frame(200, 84, .05);
+      A.sil(head(at, 32, 24, f.beak ? 'beak' : 'round'));
+      A.sil(tube([[66, 92], [48, 96]], [10, 4]));
+      A.box([186, 74, 214, 92]);
+      const shell = lb ? smooth([[180, 90], [164, 62], [120, 50], [72, 58], [42, 92], [72, 100], [120, 106], [166, 100]]) : smooth([[178, 90], [162, 62], [120, 52], [78, 60], [60, 86], [72, 100], [120, 106], [166, 100]]);
+      A.near(A.part(shell, C.shell));
+      A.near(A.part(smooth([[74, 98], [120, 104], [168, 96], [158, 108], [120, 114], [80, 108]]), C.belly));
+      if (lb) {
+        A.near(`<path d="M60 88 Q110 56 172 84 M70 94 Q118 70 170 92 M58 80 Q104 48 160 70" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".55"/>`);
+        for (const [x, y] of [[96, 70], [124, 62], [146, 74], [110, 86], [84, 84]]) A.near(`<circle cx="${x}" cy="${y}" r="2.6" fill="#ffffff" opacity=".8"/>`);
+      } else {
+        A.near(`<path d="M100 60 L96 78 L120 88 L144 78 L140 60 M96 78 L76 88 M144 78 L164 88 M120 88 L120 104 M100 60 L120 54 L140 60" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".5" stroke-linejoin="round"/>`);
+      }
+      A.near(A.group([smooth([[150, 100], [166, 130], [188, 148], [176, 150], [140, 116]])], C.body));
+      A.near(A.group([smooth([[80, 102], [62, 120], [76, 124], [92, 106]])], C.body));
+      A.eye(...at(-1, -3), 4.6);
+      A.smile(at(4, 5), at(13, 4), 2);
+    },
+
+    octo(A, f) {
+      const C = A.C, k = f.kind;
+      const webbed = k === 'dumbo' || k === 'umbrella';
+      if (k === 'dumbo') {
+        A.back(A.part(smooth([[84, 36], [56, 20], [50, 36], [60, 48], [82, 52]]), C.accent));
+        A.back(A.part(smooth([[84, 36], [56, 20], [50, 36], [60, 48], [82, 52]].map(mx)), C.accent));
+      }
+      const arm = (bx, d, far) => {
+        const y0 = far ? 78 : 82, s = webbed ? .7 : 1;
+        return tube([[bx, y0], [bx + d * 12 * s, y0 + 24 * s], [bx + d * 28 * s, y0 + 46 * s], [bx + d * 44 * s, y0 + 58 * s], [bx + d * 54 * s, y0 + 52 * s], [bx + d * 52 * s, y0 + 42 * s]], [17, 13, 10, 7, 5, 3]);
+      };
+      if (webbed) A.far(A.part(smooth([[84, 84], [50, 126], [88, 122], [120, 136], [152, 122], [190, 126], [156, 84]]), C.accentFar));
+      for (const [bx, d] of [[90, -1.4], [104, -.7], [136, .7], [150, 1.4]]) A.far(A.group([arm(bx, d, true)], C.far));
+      A.sil(smooth([[120, 16], [152, 24], [164, 52], [156, 80], [120, 92], [84, 80], [76, 52], [88, 24]]));
+      A.box([86, 22, 154, 66]);
+      const near = [[98, -1], [112, -.35], [128, .35], [142, 1]];
+      for (const [bx, d] of near) {
+        A.near(A.group([arm(bx, d, false)], C.body));
+        const s = webbed ? .7 : 1;
+        for (const t of [[12, 24], [28, 46], [44, 58]]) {
+          const x = bx + d * t[0] * s, y = 82 + t[1] * s;
+          if (k === 'mimic') A.near(`<path d="M${r1(x - 6)} ${r1(y - 2)} l12 4" stroke="${INK}" stroke-width="4" stroke-linecap="round" opacity=".7"/>`);
+          else A.near(`<circle cx="${r1(x - d * 2)}" cy="${r1(y + 4)}" r="2.6" fill="${C.horn}" stroke="${C.ol}" stroke-width="1.3"/>`);
+        }
+      }
+      if (k === 'blueringed') {
+        const rnd = seeded('rings');
+        let s = '';
+        for (let i = 0; i < 9; i++) s += `<circle cx="${r1(92 + rnd() * 56)}" cy="${r1(26 + rnd() * 34)}" r="4.2" fill="${mix(C.body, INK, .5)}" stroke="#2f6bff" stroke-width="2.4"/>`;
+        for (const [bx, d] of near) s += `<circle cx="${r1(bx + d * 20)}" cy="${r1(82 + 34)}" r="3.6" fill="${mix(C.body, INK, .5)}" stroke="#2f6bff" stroke-width="2.2"/>`;
+        A.top(s);
+      }
+      if (k === 'mimic') A.clip(`<path d="M80 34 h80 M80 50 h80 M80 66 h80" stroke="${INK}" stroke-width="5" opacity=".55"/>`);
+      A.eye(106, 62, 7.5);
+      A.eye(134, 62, 7.5);
+      A.smile([112, 77], [128, 77], 3);
+      A.cheek(98, 74); A.cheek(142, 74);
+    },
+
+    squid(A, f) {
+      const C = A.C, k = f.kind || 'squid';
+      if (k === 'vampire') {
+        A.back(A.part(smooth([[86, 36], [62, 26], [60, 42], [84, 50]]), C.accent));
+        A.back(A.part(smooth([[86, 36], [62, 26], [60, 42], [84, 50]].map(mx)), C.accent));
+        A.sil(smooth([[84, 80], [56, 142], [90, 130], [120, 152], [150, 130], [184, 142], [156, 80]]));
+        A.sil(smooth([[120, 20], [148, 30], [156, 60], [146, 86], [120, 92], [94, 86], [84, 60], [92, 30]]));
+        let s = '';
+        for (const [x, y] of [[74, 120], [98, 126], [120, 138], [142, 126], [166, 120], [88, 104], [152, 104]]) s += `<path d="M${x} ${y} l-2 6 l4 0z" fill="#ffffff" opacity=".8"/>`;
+        A.top(s);
+        A.top(`<circle cx="104" cy="64" r="11" fill="#6fd8ff" opacity=".3"/><circle cx="136" cy="64" r="11" fill="#6fd8ff" opacity=".3"/>`);
+        A.eye(104, 64, 8);
+        A.eye(136, 64, 8);
+        A.smile([113, 80], [127, 80], 2.5);
+        return;
+      }
+      if (k === 'cuttle') {
+        A.back(A.part(ellipse(106, 88, 72, 34, 14, .04), C.fin));
+        A.sil(ellipse(106, 88, 64, 28, 14));
+        A.sil(ellipse(176, 86, 18, 19, 10));
+        A.box([50, 66, 160, 108]);
+        for (const [y, e] of [[74, 204], [82, 212], [90, 214], [98, 210], [106, 204]]) A.near(A.group([tube([[186, 86 + (y - 90) * .3], [198, y], [e, y + (y - 90) * .2]], [8, 6, 3])], C.body));
+        A.eye(178, 80, 7.5);
+        A.smile([182, 94], [190, 93], 1.5);
+        return;
+      }
+      const giant = k === 'giant';
+      A.sil(smooth([[44, 84], [22, 60], [14, 64], [26, 86], [14, 108], [22, 112], [44, 90]]));
+      A.sil(tube([[30, 86], [64, 84], [116, 86], [150, 88]], [6, 34, 40, 36]));
+      A.sil(ellipse(160, 88, 16, 18, 10));
+      A.belly(smooth([[50, 96], [110, 100], [156, 98], [140, 108], [96, 108], [54, 102]]));
+      A.box([40, 70, 150, 102]);
+      A.far(A.group([tube([[170, 84], [204, 60], [228, giant ? 40 : 48]], [5, 3, 2])], C.far));
+      A.far(A.part(ellipse(230, giant ? 38 : 46, 7, 5, 8), C.far, 2));
+      A.near(A.group([tube([[170, 94], [204, 116], [228, giant ? 134 : 126]], [5, 3, 2])], C.body));
+      A.near(A.part(ellipse(230, giant ? 136 : 128, 7, 5, 8), C.accent, 2));
+      for (const [y, e] of [[72, 208], [80, 214], [90, 218], [100, 214], [108, 208]]) A.near(A.group([tube([[172, 88 + (y - 90) * .3], [190, y + 2], [e, y + (y - 90) * .25]], [8, 6, 2.5])], C.body));
+      A.eye(158, 84, giant ? 9.5 : 8);
+      A.smile([152, 98], [160, 98], 1.5);
+    },
+
+    nautilus(A) {
+      const C = A.C;
+      A.sil(ellipse(100, 86, 56, 54, 16));
+      let st = '';
+      for (let i = 0; i < 6; i++) {
+        const a = -2.6 + i * .5;
+        st += `M${r1(100 + 20 * Math.cos(a))} ${r1(86 + 20 * Math.sin(a))} Q${r1(100 + 46 * Math.cos(a + .25))} ${r1(86 + 46 * Math.sin(a + .25))} ${r1(100 + 64 * Math.cos(a + .1))} ${r1(86 + 64 * Math.sin(a + .1))}`;
+      }
+      A.clip(`<path d="${st}" stroke="#d9783a" stroke-width="8" fill="none" stroke-linecap="round" opacity=".8"/>`);
+      const sp = [];
+      for (let i = 0; i < 26; i++) { const a = i * .38, r = 32 - i * 1.1; sp.push([96 + r * Math.cos(a), 88 + r * Math.sin(a)]); }
+      A.top(`<path d="${smooth(sp, false)}" stroke="${C.ol}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+      for (const [x, y] of [[196, 96], [204, 106], [200, 118], [190, 126], [178, 124]]) A.near(A.group([tube([[160, 104], [176, (104 + y) / 2 + 4], [x, y]], [6, 4, 2.5])], '#e9a37a'));
+      A.near(A.part(smooth([[136, 64], [162, 58], [176, 76], [168, 98], [146, 102], [140, 84]]), '#a4623e'));
+      A.eye(160, 84, 5);
+    },
+
+    jelly(A, f) {
+      const C = A.C, k = f.kind || 'jelly';
+      const tent = (x0, y0, len, wv, sw = 2.6, col = C.accent) => `<path d="${smooth([[x0, y0], [x0 + wv, y0 + len * .33], [x0 - wv, y0 + len * .66], [x0 + wv * .5, y0 + len]], false)}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
+      const frill = (x0, y0, len, w) => tube([[x0, y0], [x0 + 8, y0 + len * .3], [x0 - 8, y0 + len * .62], [x0 + 4, y0 + len]], [w, w * .8, w * .6, w * .3]);
+      const face = (y = 52) => { A.eye(106, y, 6); A.eye(134, y, 6); A.smile([114, y + 12], [126, y + 12], 2.5); A.cheek(98, y + 10); A.cheek(142, y + 10); };
+      if (k === 'upside') {
+        for (const [x, y] of [[92, 112], [108, 102], [124, 98], [140, 102], [154, 112], [120, 112]]) A.back(A.part(ellipse(x, y, 13, 11, 10, .12), C.accent, 2.4));
+        A.sil(ellipse(120, 132, 54, 12, 14));
+        A.eye(108, 132, 4); A.eye(132, 132, 4);
+        return;
+      }
+      if (k === 'velella') {
+        for (let i = 0; i < 9; i++) A.back(tent(80 + i * 10, 100, 16, 3, 2.4, '#4f7bff'));
+        A.sil(ellipse(120, 98, 62, 15, 14));
+        A.top(`<path d="${smooth([[88, 94], [150, 28], [160, 94]])}" fill="#ffffff" opacity=".7" stroke="#7aa7d8" stroke-width="2.4"/>`);
+        A.eye(104, 98, 4.5); A.eye(134, 98, 4.5);
+        A.smile([114, 104], [124, 104], 2);
+        return;
+      }
+      if (k === 'manowar') {
+        for (let i = 0; i < 10; i++) A.back(tent(82 + i * 9, 74, 80 + (i % 3) * 8, 5, 2.4, '#4f6bff'));
+        for (const x of [90, 106, 124, 142, 156]) A.back(A.part(ellipse(x, 80, 6, 8, 8), C.accent, 2));
+        A.sil(smooth([[60, 74], [72, 52], [120, 34], [170, 42], [184, 62], [160, 78], [100, 80]]));
+        A.top(`<path d="${smooth([[74, 54], [100, 30], [130, 22], [162, 36], [172, 46]], false)}" stroke="#ff7fb4" stroke-width="5" fill="none" stroke-linecap="round"/>`);
+        A.eye(132, 58, 5.5); A.eye(152, 60, 5.5);
+        A.smile([138, 68], [148, 69], 2);
+        return;
+      }
+      if (k === 'comb') {
+        A.back(tent(96, 100, 60, 8, 2.2, C.accent) + tent(144, 100, 60, -8, 2.2, C.accent));
+        A.sil(ellipse(120, 78, 36, 52, 14));
+        const cols = ['#ff6b9a', '#ffd36b', '#6bffb0', '#6bc8ff', '#b46bff'];
+        let s = '';
+        for (let m = 0; m < 6; m++) {
+          const x = 92 + m * 11.2;
+          for (let j = 0; j < 7; j++) s += `<circle cx="${r1(x + Math.sin(j / 2) * 2)}" cy="${r1(40 + j * 12)}" r="2.2" fill="${cols[(m + j) % 5]}"/>`;
+        }
+        A.top(s);
+        face(70);
+        return;
+      }
+      if (k === 'atolla') {
+        for (let i = 0; i < 20; i++) {
+          const a = Math.PI * (i / 19), x = 120 - Math.cos(a) * 58, y = 78 + Math.sin(a) * 8;
+          A.back(tent(x, y, 26, 4, 2.2, C.far));
+        }
+        A.back(tent(150, 82, 78, 10, 3, C.far));
+        A.sil(smooth([[60, 80], [68, 60], [96, 46], [144, 46], [172, 60], [180, 80], [120, 88]]));
+        A.top(`<ellipse cx="120" cy="66" rx="38" ry="10" fill="none" stroke="${C.ol}" stroke-width="2" opacity=".5"/>`);
+        for (let i = 0; i < 8; i++) A.top(`<circle cx="${70 + i * 14.3}" cy="80" r="3" fill="#7fd6ff" opacity=".8"/>`);
+        face(60);
+        return;
+      }
+      const tiny = k === 'immortal', s = tiny ? .55 : 1, cy = tiny ? 40 : 0;
+      const S = (x, y) => [120 + (x - 120) * s, cy + y * s + (tiny ? 26 : 0)];
+      const n = k === 'lionmane' ? 22 : tiny ? 16 : 9;
+      for (let i = 0; i < n; i++) A.back(tent(...S(74 + i * (92 / (n - 1)), 76), (k === 'lionmane' ? 96 : 84) * s, 6 * s, k === 'lionmane' ? 2 : 2.4, C.accent));
+      if (k !== 'moon' && k !== 'box' && !tiny) for (const x of [108, 120, 132]) A.far(A.part(frill(x, 74, 70, 12), C.accentFar, 2.4));
+      if (k === 'box') for (const x of [80, 104, 136, 160]) for (let j = 0; j < 3; j++) A.back(tent(x + j * 3 - 3, 76, 80, 5, 2.2, C.accent));
+      const bell = k === 'box' ? [[78, 76], [78, 34], [92, 24], [148, 24], [162, 34], [162, 76], [120, 82]]
+        : k === 'moon' ? [[56, 76], [70, 46], [100, 30], [140, 30], [170, 46], [184, 76], [150, 82], [120, 78], [90, 82]]
+          : [[66, 74], [72, 44], [96, 22], [144, 22], [168, 44], [174, 74], [156, 80], [138, 74], [120, 80], [102, 74], [84, 80]];
+      A.sil(smooth(bell.map(p => S(...p))));
+      if (k === 'moon') for (const x of [94, 110, 130, 146]) A.top(`<path d="M${x - 7} 62 a7 7 0 1 1 14 0" stroke="${C.accentFar}" stroke-width="3" fill="none" stroke-linecap="round"/>`);
+      if (tiny) A.top(`<path d="${ellipse(...S(120, 56), 14, 12, 10)}" fill="#ff7b5c" opacity=".85"/>`);
+      if (tiny) { A.eye(...S(106, 46), 5); A.eye(...S(134, 46), 5); A.smile(S(114, 58), S(126, 58), 2); }
+      else face(k === 'moon' ? 50 : 50);
+    },
+
+    crab(A, f) {
+      const C = A.C, k = f.kind || 'crab';
+      const thin = k === 'spider' || k === 'arrow';
+      const legs = [];
+      const n = k === 'king' ? 4 : thin ? 4 : 3;
+      for (let i = 0; i < n; i++) {
+        const y0 = (thin ? 92 : 104) + i * 6;
+        const leg = thin
+          ? tube([[104 - i * 2, y0], [60 - i * 12, y0 - 34 + i * 6], [22 - i * 6, 150]], [6, 4, 2.4])
+          : tube([[86 - i * 2, y0], [56 - i * 8, y0 - 8], [46 - i * 10, 148]], k === 'king' ? [10, 8, 5] : [9, 7, 4]);
+        legs.push(leg);
+      }
+      const legsR = [];
+      for (let i = 0; i < n; i++) {
+        const y0 = (thin ? 92 : 104) + i * 6;
+        legsR.push(thin
+          ? tube([[136 + i * 2, y0], [180 + i * 12, y0 - 34 + i * 6], [218 + i * 6, 150]], [6, 4, 2.4])
+          : tube([[154 + i * 2, y0], [184 + i * 8, y0 - 8], [194 + i * 10, 148]], k === 'king' ? [10, 8, 5] : [9, 7, 4]));
+      }
+      A.far(A.group([...legs, ...legsR], C.far));
+      if (k === 'arrow') {
+        A.sil(smooth([[120, 36], [136, 84], [128, 104], [112, 104], [104, 84]]));
+        A.top(`<path d="M30 140 l14 -30 M206 140 l-14 -30" stroke="${C.accent}" stroke-width="2" opacity=".6"/>`);
+      } else if (k === 'spider') A.sil(ellipse(120, 94, 32, 26, 12));
+      else A.sil(smooth([[66, 102], [76, 80], [120, 70], [164, 80], [174, 102], [160, 118], [120, 124], [80, 118]]));
+      const ey = k === 'arrow' ? 74 : 56;
+      A.sil(tube([[110, ey + 22], [106, ey]], [6, 5]));
+      A.sil(tube([[130, ey + 22], [134, ey]], [6, 5]));
+      A.box([80, 76, 160, 112]);
+      A.belly(smooth([[80, 112], [120, 118], [160, 112], [150, 124], [120, 128], [90, 124]]));
+      const claw = (s, flip, col) => {
+        const P = ([x, y]) => flip ? [240 - (120 + (x - 120) * s), 96 + (y - 96) * s] : [120 + (x - 120) * s, 96 + (y - 96) * s];
+        const arm = tube([[76, 98], [54, 86], [46, 68]].map(P), [12 * s, 10 * s, 9 * s]);
+        const pin = smooth([[34, 68], [30, 46], [44, 36], [56, 44], [50, 50], [44, 48], [46, 58], [58, 62], [52, 72]].map(P));
+        return A.group([arm, pin], col);
+      };
+      if (k === 'fiddler') A.offset(-10, 8);
+      const big = k === 'fiddler' ? 1.28 : 1, small = k === 'fiddler' ? .62 : thin ? .7 : 1;
+      A.near(claw(small, false, C.body));
+      A.near(claw(big, true, k === 'fiddler' ? C.accent : C.body));
+      if (k === 'king') for (const [x, y] of [[96, 84], [120, 78], [144, 84], [108, 96], [132, 96], [84, 100], [156, 100]]) A.top(A.part(smooth([[x - 4, y + 3], [x, y - 6], [x + 4, y + 3]]), C.horn, 1.6));
+      if (k === 'decorator') {
+        A.top(A.part(ellipse(96, 78, 12, 8, 10, .2), '#7fcf6c', 2) + A.part(ellipse(146, 80, 10, 7, 10, .2), '#f594b8', 2) + A.part(ellipse(122, 72, 8, 6, 8, .2), '#b4d64e', 2));
+      }
+      if (k === 'yeti') {
+        let s = '';
+        for (const sx of [1, -1]) for (let i = 0; i < 7; i++) { const x = 120 + sx * (52 + i * 5), y = 92 - i * 3; s += `M${x} ${y} l${sx * 4} 6`; }
+        A.top(`<path d="${s}" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>`);
+      }
+      A.eye(106, ey, 6);
+      A.eye(134, ey, 6);
+      if (k === 'arrow') A.smile([114, 92], [126, 92], 2);
+      else { A.smile([112, 100], [128, 100], 3); A.cheek(98, 98); A.cheek(142, 98); }
+    },
+
+    hermit(A) {
+      const C = A.C;
+      A.back(A.part(smooth([[44, 124], [42, 92], [60, 64], [96, 52], [128, 60], [144, 86], [140, 118], [112, 134], [70, 136]]), C.accent));
+      const sp = [];
+      for (let i = 0; i < 22; i++) { const a = i * .42, r = 34 - i * 1.4; sp.push([92 + r * Math.cos(a), 94 + r * Math.sin(a)]); }
+      A.back(`<path d="${smooth(sp, false)}" stroke="${C.ol}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+      A.far(A.group([tube([[150, 120], [166, 132], [170, 150]], [8, 6, 4]), tube([[160, 118], [182, 128], [190, 150]], [8, 6, 4])], C.far));
+      A.sil(smooth([[134, 102], [150, 92], [172, 96], [180, 112], [168, 126], [140, 126]]));
+      A.sil(tube([[160, 96], [164, 74]], [6, 5]));
+      A.sil(tube([[150, 96], [148, 74]], [6, 5]));
+      A.box([140, 96, 178, 122]);
+      A.near(A.group([tube([[168, 114], [188, 112]], [11, 10]), smooth([[184, 104], [204, 96], [214, 104], [204, 110], [214, 116], [204, 122], [186, 120]])], C.body));
+      A.near(A.group([tube([[146, 122], [148, 138], [140, 150]], [8, 6, 4])], C.body));
+      A.eye(148, 72, 5.5);
+      A.eye(164, 72, 5.5);
+      A.smile([160, 108], [170, 106], 2);
+    },
+
+    crust(A, f) {
+      const C = A.C, k = f.kind || 'shrimp';
+      const ant = (pts) => `<path d="${smooth(pts, false)}" stroke="${C.ol}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+      if (k === 'lobster') {
+        A.offset(-16, 0);
+        A.back(ant([[204, 104], [190, 60], [150, 34], [110, 26]]) + ant([[206, 106], [200, 66], [176, 36], [150, 22]]));
+        A.far(A.group([tube([[184, 120], [200, 132], [214, 128]], [9, 8, 7]), smooth([[208, 120], [228, 112], [238, 118], [228, 124], [238, 130], [226, 136], [210, 132]])], C.far));
+        let lg = [];
+        for (const x of [100, 120, 140, 160]) lg.push(tube([[x, 128], [x - 6, 140], [x - 12, 150]], [5, 4, 3]));
+        A.far(A.group(lg, C.far));
+        A.sil(tube([[198, 110], [168, 108], [130, 112], [94, 118], [64, 124]], [28, 32, 28, 22, 16]));
+        A.sil(smooth([[68, 122], [44, 108], [34, 116], [38, 128], [34, 140], [44, 146], [68, 130]]));
+        A.clip(`<path d="M80 104 v36 M96 102 v36 M112 100 v36 M128 98 v36" stroke="${C.ol}" stroke-width="2" opacity=".35"/>`);
+        A.near(A.group([tube([[186, 124], [204, 140], [216, 138]], [10, 9, 8]), smooth([[210, 128], [230, 120], [240, 126], [230, 132], [240, 138], [228, 146], [210, 142]])], C.body));
+        A.eye(200, 100, 5);
+        A.smile([204, 114], [210, 113], 1.5);
+        return;
+      }
+      if (k === 'mantis') {
+        A.sil(tube([[200, 96], [160, 100], [120, 104], [84, 108], [60, 112]], [26, 28, 26, 22, 16]));
+        A.sil(smooth([[64, 110], [42, 96], [34, 104], [38, 116], [34, 128], [42, 132], [64, 118]]));
+        A.clip(`<path d="M90 90 v36 M108 88 v36 M126 86 v36 M144 86 v36 M162 86 v36" stroke="#ff7a59" stroke-width="5" opacity=".7"/>`);
+        A.near(A.group([tube([[192, 108], [210, 122], [224, 108]], [10, 8, 6])], '#ff7a59'));
+        A.near(A.group([tube([[204, 90], [206, 76]], [6, 5]), tube([[214, 92], [218, 78]], [6, 5])], C.body));
+        A.eye(206, 72, 6);
+        A.eye(218, 74, 6);
+        A.smile([208, 100], [216, 99], 1.5);
+        return;
+      }
+      A.back(ant([[208, 68], [170, 30], [110, 18], [60, 26]]) + ant([[210, 70], [178, 44], [130, 36], [80, 46]]));
+      let lg = [];
+      for (const x of [118, 134, 150, 166, 182]) lg.push(tube([[x, 80], [x - 4, 96], [x - 10, 104]], [4, 3, 2.5]));
+      A.far(A.group(lg, C.far));
+      A.sil(tube([[204, 74], [178, 62], [146, 62], [116, 72], [94, 92], [86, 114]], [24, 28, 26, 22, 16, 10]));
+      A.sil(smooth([[92, 112], [70, 124], [74, 134], [88, 128], [96, 138], [102, 126]]));
+      A.sil(tube([[208, 70], [230, 64]], [6, 1.5]));
+      A.clip(`<path d="M120 52 q-6 20 -2 36 M140 50 q-4 20 0 34 M104 64 q-8 16 0 34" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".35"/>`);
+      A.box([100, 52, 200, 86]);
+      if (k === 'krill') for (const x of [120, 140, 160, 180]) A.top(`<circle cx="${x}" cy="80" r="4.5" fill="#8fefff" opacity=".4"/><circle cx="${x}" cy="80" r="2" fill="#d8fbff"/>`);
+      A.eye(198, 62, 5.5);
+      A.smile([204, 76], [210, 75], 1.5);
+    },
+
+    star(A, f) {
+      const C = A.C, k = f.kind || 'star';
+      if (k === 'brittle' || k === 'feather') {
+        const feather = k === 'feather', n = feather ? 8 : 5;
+        for (let i = 0; i < n; i++) {
+          const a = -Math.PI / 2 + i * (2 * Math.PI / n);
+          const pts = [0, .35, .7, 1].map((t, j) => [120 + Math.cos(a + j * .25) * (16 + t * 68), 90 + Math.sin(a + j * .25) * (16 + t * 58)]);
+          A.far(A.group([tube(pts, feather ? [8, 6, 4, 2] : [9, 7, 5, 2.5])], i % 2 ? C.far : C.body));
+          if (feather) {
+            let s = '';
+            for (let j = 1; j < 4; j++) { const p = pts[j]; s += `M${r1(p[0])} ${r1(p[1])} l${r1(Math.cos(a + 1.6) * 8)} ${r1(Math.sin(a + 1.6) * 8)} M${r1(p[0])} ${r1(p[1])} l${r1(Math.cos(a - 1.6) * 8)} ${r1(Math.sin(a - 1.6) * 8)}`; }
+            A.far(`<path d="${s}" stroke="${C.ol}" stroke-width="2" stroke-linecap="round"/>`);
+          }
+        }
+        A.sil(ellipse(120, 90, 20, 18, 10));
+        A.eye(113, 88, 4.5); A.eye(127, 88, 4.5);
+        A.smile([116, 97], [124, 97], 2);
+        return;
+      }
+      const pts = [];
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 24 : 64;
+        pts.push([120 + Math.cos(a) * r, 92 + Math.sin(a) * r * .9]);
+      }
+      A.sil(smooth(pts));
+      A.box([70, 50, 170, 140]);
+      let s = '';
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+        for (const t of [32, 46]) s += `<circle cx="${r1(120 + Math.cos(a) * t)}" cy="${r1(92 + Math.sin(a) * t * .9)}" r="2.6" fill="${C.belly}" opacity=".8"/>`;
+      }
+      A.top(s);
+      A.eye(110, 88, 6); A.eye(130, 88, 6);
+      A.smile([114, 101], [126, 101], 3);
+      A.cheek(102, 98); A.cheek(138, 98);
+    },
+
+    sanddollar(A) {
+      const C = A.C;
+      A.sil(ellipse(120, 98, 62, 46, 16));
+      let s = '';
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+        s += `<path d="${ellipse(120 + Math.cos(a) * 18, 92 + Math.sin(a) * 14, 6, 10, 10)}" fill="none" stroke="${C.accent}" stroke-width="2.6" transform="rotate(${r1(a * 180 / Math.PI + 90)} ${r1(120 + Math.cos(a) * 18)} ${r1(92 + Math.sin(a) * 14)})"/>`;
+      }
+      A.top(s);
+      A.eye(106, 122, 4.5); A.eye(134, 122, 4.5);
+      A.smile([116, 130], [124, 130], 2);
+    },
+
+    urchin(A) {
+      const C = A.C;
+      for (let i = 0; i < 26; i++) {
+        const a = Math.PI + i * (Math.PI / 25) - .1, b = [120 + Math.cos(a) * 34, 116 + Math.sin(a) * 28];
+        A.back(A.part(tube([b, [120 + Math.cos(a) * 70, 116 + Math.sin(a) * 60]], [5, 1.4]), i % 2 ? C.far : C.accent, 2));
+      }
+      A.sil(ellipse(120, 118, 42, 34, 14));
+      A.box([80, 90, 160, 140]);
+      A.eye(108, 114, 6); A.eye(132, 114, 6);
+      A.smile([114, 127], [126, 127], 3);
+    },
+
+    cucumber(A) {
+      const C = A.C;
+      A.sil(tube([[46, 132], [100, 126], [150, 128], [188, 132]], [26, 34, 32, 26]));
+      let s = '';
+      for (const x of [60, 80, 100, 120, 140, 160, 176]) s += A.part(smooth([[x - 4, 116 + (x % 3)], [x, 104 + (x % 4)], [x + 4, 116 + (x % 3)]]), C.accent, 1.6);
+      A.top(s);
+      A.eye(176, 128, 4.5);
+      A.smile([180, 138], [188, 137], 1.5);
+    },
+
+    seahorse(A) {
+      const C = A.C;
+      A.back(A.part(smooth([[126, 88], [108, 90], [106, 104], [124, 106]]), C.fin));
+      A.sil(tube([[150, 40], [140, 58], [138, 80], [138, 100], [130, 118], [120, 134], [124, 148], [138, 148], [140, 136], [130, 132]], [22, 16, 28, 30, 22, 14, 10, 7, 5, 3]));
+      const at = frame(152, 42, .2);
+      A.sil(head(at, 28, 20));
+      A.sil(tube([[162, 46], [186, 52]], [9, 8]));
+      for (const [x, y] of [[146, 28], [152, 26], [158, 28]]) A.sil(tube([[x, y + 6], [x, y - 2]], [5, 2]));
+      A.belly(smooth([[146, 66], [156, 90], [148, 112], [138, 104], [142, 84]]));
+      A.clip(`<path d="M126 70 h26 M126 82 h26 M124 94 h26 M120 106 h24 M116 118 h20" stroke="${C.ol}" stroke-width="2" opacity=".3"/>`);
+      A.box([122, 60, 150, 120]);
+      A.eye(...at(2, -2), 5.5);
+      A.smile([180, 56], [186, 55], 1.5);
+      A.cheek(...at(4, 6));
+    },
+
+    dragon(A, f) {
+      const C = A.C, k = f.kind || 'leafy';
+      if (k === 'pipe') {
+        A.back(A.part(smooth([[30, 86], [14, 76], [10, 86], [14, 98]]), C.fin));
+        A.sil(tube([[28, 88], [80, 86], [140, 84], [180, 82]], [5, 10, 14, 16]));
+        A.sil(tube([[178, 82], [228, 84]], [9, 7]));
+        A.clip(`<path d="${Array.from({ length: 12 }, (_, i) => `M${44 + i * 12} 74 v24`).join(' ')}" stroke="${C.ol}" stroke-width="1.8" opacity=".35"/>`);
+        A.eye(178, 80, 5);
+        A.smile([222, 86], [228, 85], 1);
+        return;
+      }
+      const c = [[20, 132], [50, 124], [80, 108], [110, 92], [140, 80], [164, 72]];
+      const w = [3, 8, 16, 20, 16, 14];
+      const leafy = k === 'leafy';
+      const leaves = leafy ? [[50, 122, 1], [78, 108, 1], [108, 92, 1], [132, 82, 1], [64, 118, -1], [96, 102, -1], [124, 88, -1], [150, 76, 1]] : [[60, 118, 1], [104, 94, 1], [140, 80, 1], [84, 106, -1], [126, 86, -1]];
+      for (const [x, y, s] of leaves) {
+        const L = leafy ? 32 : 20;
+        A.back(A.part(smooth([[x, y], [x - 10, y - s * L * .7], [x + 2, y - s * L], [x + 12, y - s * L * .5]]), leafy ? '#c9d84e' : C.accent, 2));
+      }
+      A.sil(tube(c, w));
+      A.sil(tube([[164, 72], [180, 66]], [16, 15]));
+      A.sil(tube([[178, 66], [216, 70]], [8, 6]));
+      A.box([60, 76, 160, 122]);
+      A.eye(178, 62, 5);
+      A.smile([210, 72], [216, 71], 1);
+    },
+
+    eel(A, f) {
+      const C = A.C, k = f.kind || 'moray';
+      if (k === 'garden') {
+        for (const [x, top, d] of [[70, 74, 1], [120, 52, -1], [172, 82, 1]]) {
+          A.sil(tube([[x, 156], [x + 2, 130], [x - 4 * d, 104], [x + 4 * d, top + 10], [x + 12 * d, top]], [10, 9, 9, 8, 9]));
+          A.eye(x + 13 * d, top - 1, 4);
+          A.smile([x + 14 * d, top + 6], [x + 19 * d, top + 4], 1.2);
+        }
+        A.top(`<path d="${smooth([[0, 170], [0, 154], [60, 150], [120, 154], [180, 150], [240, 154], [240, 170]])}" fill="#f2e2b4"/>`);
+        A.box([50, 50, 190, 156]);
+        return;
+      }
+      if (k === 'oar') {
+        const c = [[4, 110], [40, 96], [80, 108], [120, 92], [160, 98], [196, 82]];
+        let fin = '';
+        for (let i = 0; i < 14; i++) { fin += A.part(tube([[12 + i * 13.5, 100 - Math.sin(i * .9) * 7 - 8], [10 + i * 13.5, 88 - Math.sin(i * .9) * 7 - 8]], [4, 1.4]), '#ff5a5a', 1.6); }
+        A.back(fin);
+        A.back(A.part(tube([[198, 74], [184, 46], [176, 30]], [5, 3, 1.5]), '#ff5a5a', 1.8) + A.part(tube([[202, 72], [196, 42], [196, 24]], [5, 3, 1.5]), '#ff5a5a', 1.8));
+        A.sil(tube(c, [2, 12, 16, 18, 18, 20]));
+        A.sil(head(frame(206, 82, .1), 28, 20));
+        A.eye(206, 78, 5);
+        A.smile([212, 88], [220, 86], 1.5);
+        A.box([20, 80, 190, 110]);
+        return;
+      }
+      if (k === 'ribbon') {
+        A.top(`<path d="${smooth([[0, 170], [0, 150], [40, 146], [90, 152], [90, 170]])}" fill="#f2e2b4"/>`);
+        const c = [[60, 152], [70, 120], [100, 104], [134, 108], [160, 92], [176, 72]];
+        A.back(A.part(tube(c.map(p => [p[0] + 2, p[1] - 8]), [3, 6, 7, 7, 7, 6]), '#ffd23f', 2));
+        A.sil(tube(c, [8, 9, 10, 10, 10, 10]));
+        const at = frame(190, 64, -.2);
+        A.sil(head(at, 30, 16, 'croc'));
+        A.top(A.part(tube([at(13, -6), at(24, -14)], [5, 3]), '#ffd23f', 1.6));
+        A.top(A.part(smooth([at(6, 2), at(18, 4), at(14, 9)]), '#ffd23f', 1.8));
+        A.eye(...at(-2, -3), 4.5);
+        A.box([60, 60, 180, 150]);
+        return;
+      }
+      A.far(A.part(smooth([[0, 50], [30, 44], [70, 60], [86, 100], [80, 150], [40, 168], [0, 170]]), '#8b95a8'));
+      A.far(`<path d="${ellipse(56, 110, 18, 26, 12)}" fill="#3b4055"/>`);
+      const c = [[50, 114], [80, 100], [110, 104], [140, 96], [164, 80], [178, 66]];
+      A.back(A.part(tube(c.map(p => [p[0], p[1] - 10]), [4, 8, 8, 8, 8, 6]), C.fin, 2));
+      A.sil(tube(c, [30, 30, 28, 26, 24, 22]));
+      const at = frame(196, 60, -.1);
+      A.sil(head(at, 44, 32));
+      A.box([60, 70, 190, 110]);
+      A.top(`<path d="${smooth([at(2, 4), at(22, 0), at(20, 12), at(4, 12)])}" fill="#5a2f45" stroke="${C.ol}" stroke-width="2.4"/>`);
+      if (f.teeth) A.top(`<path d="M${pt(at(8, 4))} l2 4 l2 -4 M${pt(at(14, 3))} l2 4 l2 -4" fill="#ffffff" stroke="${C.ol}" stroke-width="1.2"/>`);
+      A.eye(...at(-4, -7), 6);
+    },
+
+    shell(A, f) {
+      const C = A.C, k = f.kind;
+      const peek = (x, y, s = 4.5) => { A.eye(x - 9, y, s); A.eye(x + 9, y, s); };
+      if (k === 'clam' || k === 'giantclam' || k === 'oyster') {
+        const g = k === 'giantclam';
+        const bottom = k === 'oyster' ? ellipse(120, 126, 60, 20, 14, .06) : smooth([[64, 112], [120, 118], [176, 112], [168, 138], [120, 148], [72, 138]]);
+        const topv = k === 'oyster' ? smooth([[62, 112], [72, 82], [120, 68], [170, 84], [180, 110], [120, 104]]) : smooth([[64, 106], [74, 76], [120, 60], [166, 76], [176, 106], [120, 100]]);
+        A.far(A.part(bottom, C.far));
+        A.far(`<path d="${ellipse(120, 112, 50, 10, 12)}" fill="${g ? '#3d6bdb' : '#6b3a4f'}"/>`);
+        if (g) for (const x of [88, 104, 120, 136, 152]) A.far(`<circle cx="${x}" cy="112" r="3" fill="#7fd6ff"/>`);
+        if (k === 'oyster') A.far(`<circle cx="120" cy="114" r="9" fill="#ffffff" stroke="#c9d3e3" stroke-width="2"/><circle cx="117" cy="111" r="3" fill="#ffffff"/>`);
+        A.sil(topv);
+        let rid = '';
+        for (let i = 0; i < 7; i++) { const a = Math.PI + .35 + i * .4; rid += `M120 100 L${r1(120 + Math.cos(a) * 58)} ${r1(100 + Math.sin(a) * 42)}`; }
+        A.clip(`<path d="${rid}" stroke="${C.ol}" stroke-width="2" opacity=".3"/>`);
+        if (g) A.clip(`<path d="M64 106 l14 -10 l14 10 l14 -10 l14 10 l14 -10 l14 10 l14 -10" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".4"/>`);
+        if (k !== 'oyster') peek(120, 110, 4);
+        else peek(120, 98, 4);
+        return;
+      }
+      if (k === 'mussel') {
+        A.far(A.part(smooth([[60, 124], [100, 96], [176, 92], [190, 110], [150, 132], [80, 138]]), C.far));
+        A.far(`<path d="${smooth([[80, 118], [140, 106], [180, 106], [150, 120]])}" fill="#f6a64f"/>`);
+        A.sil(smooth([[58, 118], [96, 90], [172, 84], [190, 102], [146, 114], [80, 124]]));
+        A.clip(`<path d="M80 112 Q130 96 182 96 M90 106 Q130 92 176 90" stroke="#ffffff" stroke-width="2" fill="none" opacity=".3"/>`);
+        peek(150, 112, 4);
+        return;
+      }
+      if (k === 'cowrie') {
+        A.sil(ellipse(120, 104, 66, 40, 14));
+        A.box([60, 70, 180, 136]);
+        A.top(`<path d="M64 120 Q120 140 176 120" stroke="${C.ol}" stroke-width="2.4" fill="none"/><ellipse cx="100" cy="84" rx="18" ry="6" fill="#ffffff" opacity=".45"/>`);
+        peek(186, 112, 3.5);
+        return;
+      }
+      if (k === 'abalone') {
+        A.far(A.part(ellipse(120, 132, 66, 12, 12), '#e7b98f'));
+        A.sil(smooth([[54, 120], [70, 84], [120, 70], [176, 82], [190, 112], [160, 128], [90, 130]]));
+        A.clip(`<path d="M60 118 Q110 100 186 110" stroke="#ff9ad5" stroke-width="7" fill="none" opacity=".5"/><path d="M64 124 Q116 108 188 118" stroke="#9adfff" stroke-width="6" fill="none" opacity=".5"/>`);
+        for (let i = 0; i < 6; i++) A.top(`<circle cx="${84 + i * 16}" cy="${86 - Math.sin(i / 1.8) * 6}" r="3.6" fill="${C.ol}" opacity=".7"/>`);
+        peek(178, 130, 3.5);
+        return;
+      }
+      if (k === 'limpet') {
+        A.far(A.part(smooth([[0, 170], [0, 136], [60, 128], [180, 130], [240, 138], [240, 170]]), '#9aa5b8'));
+        A.sil(smooth([[60, 132], [96, 86], [120, 74], [144, 86], [180, 132], [120, 138]]));
+        A.clip(`<path d="M120 76 L70 132 M120 76 L96 134 M120 76 L120 136 M120 76 L144 134 M120 76 L170 132" stroke="${C.ol}" stroke-width="2" opacity=".3"/>`);
+        peek(120, 124, 4);
+        return;
+      }
+      if (k === 'razor') {
+        A.far(`<path d="${smooth([[-10, 170], [-10, 132], [80, 128], [160, 134], [250, 130], [250, 170]])}" fill="#f2e2b4"/>`);
+        A.sil(tube([[90, 140], [150, 70]], [22, 22]));
+        A.top(`<path d="M${pt([90, 140])} L${pt([150, 70])}" stroke="${C.ol}" stroke-width="2" opacity=".4"/>`);
+        A.top(`<path d="${smooth([[-10, 170], [-10, 140], [80, 136], [160, 142], [250, 138], [250, 170]])}" fill="#f2e2b4"/>`);
+        peek(144, 90, 4);
+        return;
+      }
+      // Spiral sea snails: conch, whelk, triton and the shell collector.
+      const tall = k === 'whelk' || k === 'triton';
+      A.far(A.part(smooth([[160, 134], [196, 130], [214, 140], [196, 146], [150, 146]]), '#e9a98a'));
+      A.sil(tall
+        ? smooth([[40, 66], [70, 70], [130, 86], [176, 100], [190, 120], [160, 136], [100, 128], [60, 100]])
+        : smooth([[60, 120], [56, 92], [80, 70], [120, 56], [160, 60], [190, 82], [198, 110], [176, 130], [130, 140], [90, 136]]));
+      if (!tall) for (const x of [86, 106, 126, 146, 166]) A.sil(smooth([[x - 7, 70 - (x - 120) * .15 + 6], [x, 46 - Math.abs(x - 126) * .3], [x + 7, 70 - (x - 120) * .15 + 6]]));
+      if (k === 'conch') A.near(A.part(smooth([[150, 88], [198, 74], [218, 100], [194, 132], [150, 124]]), '#ff9fb2'));
+      A.box(tall ? [50, 70, 180, 130] : [64, 66, 190, 130]);
+      const lines = tall ? 'M70 74 Q66 92 80 100 M100 80 Q94 100 112 112 M130 88 Q124 108 140 122' : 'M80 76 Q72 100 92 118 M110 64 Q100 96 124 126 M146 64 Q136 96 160 120';
+      A.top(`<path d="${lines}" stroke="${C.ol}" stroke-width="2.2" fill="none" opacity=".45"/>`);
+      if (k === 'xeno') for (const [x, y, r] of [[70, 118, 9], [96, 132, 7], [176, 126, 8], [150, 138, 6], [190, 98, 7]]) A.top(A.part(ellipse(x, y, r, r * .7, 8), '#f3e1c2', 1.8));
+      A.sil(tube([[176, 124], [184, 104]], [5, 4]));
+      A.sil(tube([[186, 126], [198, 108]], [5, 4]));
+      A.eye(184, 102, 4.5);
+      A.eye(198, 106, 4.5);
+    },
+
+    coral(A, f) {
+      const C = A.C, k = f.kind || 'branch';
+      A.far(A.part(smooth([[40, 170], [52, 150], [120, 144], [188, 150], [200, 170]]), '#9aa5b8'));
+      if (k === 'zoanthid') {
+        for (const [x, y, r] of [[80, 120, 16], [116, 110, 18], [154, 120, 16], [98, 140, 14], [136, 140, 15], [62, 142, 12], [176, 142, 12]]) {
+          let petals = '';
+          for (const [px, py] of ring(x, y, r + 4, r + 4, 12)) petals += `<circle cx="${r1(px)}" cy="${r1(py)}" r="3.2" fill="#ff9a3d" stroke="${C.ol}" stroke-width="1.2"/>`;
+          A.near(petals + A.part(ellipse(x, y, r, r, 12), C.body, 2) + `<circle cx="${x}" cy="${y}" r="${r * .4}" fill="${C.accent}"/>`);
+        }
+        A.eye(108, 108, 4); A.eye(124, 108, 4);
+        return;
+      }
+      if (k === 'xenia') {
+        for (const [x, h] of [[80, 70], [104, 50], [128, 40], [152, 56], [176, 72]]) {
+          A.sil(tube([[x, 150], [x + 2, h + 20], [x, h + 6]], [10, 8, 8]));
+          for (let i = 0; i < 8; i++) {
+            const a = -Math.PI / 2 + (i - 3.5) * .4;
+            A.top(A.part(tube([[x, h + 6], [x + Math.cos(a) * 18, h + 6 + Math.sin(a) * 18]], [5, 3]), C.belly, 1.6));
+          }
+        }
+        A.eye(122, 100, 4); A.eye(136, 100, 4);
+        return;
+      }
+      const br = k === 'elkhorn'
+        ? [[[120, 150], [118, 110], [90, 80], [60, 60]], [[118, 116], [146, 84], [180, 62]], [[100, 94], [96, 64]], [[150, 90], [160, 58]]]
+        : [[[120, 150], [118, 112], [100, 82], [84, 56]], [[118, 118], [140, 92], [156, 60]], [[104, 92], [72, 84], [56, 66]], [[138, 98], [170, 92], [186, 72]], [[118, 112], [122, 70], [120, 44]]];
+      for (const b of br) A.sil(tube(b, b.map((_, i) => (k === 'elkhorn' ? 22 : 16) - i * 2)));
+      if (k !== 'elkhorn') {
+        let s = '';
+        const rnd = seeded('polyps');
+        for (let i = 0; i < 26; i++) s += `<circle cx="${r1(60 + rnd() * 130)}" cy="${r1(48 + rnd() * 96)}" r="2" fill="#ffffff" opacity=".7"/>`;
+        A.clip(s);
+      }
+      A.eye(110, 120, 4.5); A.eye(128, 120, 4.5);
+      A.smile([114, 130], [124, 130], 2);
+    },
+
+    anemone(A, f) {
+      const C = A.C;
+      A.far(A.part(smooth([[30, 170], [44, 148], [120, 140], [196, 148], [210, 170]]), '#9aa5b8'));
+      const one = (x, y, s, col) => {
+        let t = '';
+        for (let i = 0; i < 13; i++) {
+          const a = Math.PI + .1 + i * (Math.PI - .2) / 12;
+          const b = [x + Math.cos(a) * 26 * s, y + Math.sin(a) * 8 * s], e = [x + Math.cos(a) * 44 * s, y + Math.sin(a) * 40 * s - 10 * s];
+          t += A.part(tube([b, [(b[0] + e[0]) / 2 + 4 * s, (b[1] + e[1]) / 2], e], [9 * s, 7 * s, 5 * s]), col, 2);
+        }
+        return t;
+      };
+      if (f.kind === 'jewel') {
+        for (const [x, y, s, col] of [[76, 122, .55, '#f594b8'], [120, 108, .6, '#a78ce6'], [164, 122, .55, '#f6a64f'], [98, 142, .5, '#f1cd52'], [142, 142, .5, '#ee7563']]) {
+          A.back(one(x, y, s, col));
+          A.near(A.part(tube([[x, y + 22 * s], [x, y]], [40 * s, 46 * s]), col));
+        }
+        A.eye(112, 112, 4); A.eye(128, 112, 4);
+        return;
+      }
+      A.back(one(120, 92, 1, C.accent));
+      A.sil(tube([[120, 150], [120, 94]], [48, 56]));
+      A.box([96, 96, 144, 146]);
+      A.eye(108, 116, 5.5); A.eye(132, 116, 5.5);
+      A.smile([114, 128], [126, 128], 3);
+      A.cheek(102, 126); A.cheek(138, 126);
+    },
+
+    penguin(A, f) {
+      const C = A.C, k = f.kind;
+      const tall = k === 'emperor' ? 1.06 : k === 'rock' ? .86 : 1;
+      const Y = y => 146 - (146 - y) * tall;
+      A.far(A.group([smooth([[90, Y(70)], [70, Y(112)], [78, Y(116)], [96, Y(90)]])], C.far));
+      A.sil(smooth([[120, Y(24)], [146, Y(36)], [156, Y(80)], [154, Y(120)], [140, Y(142)], [100, Y(142)], [86, Y(120)], [84, Y(80)], [94, Y(36)]]));
+      A.belly(smooth([[120, Y(50)], [140, Y(62)], [146, Y(100)], [138, Y(138)], [102, Y(138)], [94, Y(100)], [100, Y(62)]]));
+      if (k === 'emperor' || k === 'king') {
+        A.clip(`<path d="${ellipse(100, Y(56), 8, 12, 10)}" fill="${k === 'king' ? '#ff8f1f' : '#ffd15c'}"/><path d="${ellipse(140, Y(56), 8, 12, 10)}" fill="${k === 'king' ? '#ff8f1f' : '#ffd15c'}"/>`);
+        A.clip(`<path d="${ellipse(120, Y(76), 18, 10, 10)}" fill="${k === 'king' ? '#ffb15c' : '#fff1b8'}"/>`);
+      }
+      A.near(A.group([smooth([[150, Y(70)], [170, Y(112)], [162, Y(116)], [146, Y(90)]])], C.body));
+      A.top(A.part(ellipse(106, 146, 12, 5, 10), '#ff9f43', 2) + A.part(ellipse(134, 146, 12, 5, 10), '#ff9f43', 2));
+      if (k === 'rock') {
+        for (const s of [1, -1]) A.top(A.part(smooth([[120 + s * 6, Y(40)], [120 + s * 26, Y(30)], [120 + s * 34, Y(22)], [120 + s * 22, Y(36)]]), '#ffd23f', 1.8));
+      }
+      A.eye(110, Y(42), 5.5);
+      A.eye(130, Y(42), 5.5);
+      A.top(A.part(smooth([[113, Y(52)], [127, Y(52)], [120, Y(64)]]), k === 'rock' ? '#ff6b5a' : '#ffae42', 2));
+      A.cheek(104, Y(52)); A.cheek(136, Y(52));
+    },
+
+    bird(A, f) {
+      const C = A.C;
+      if (f.kind === 'pelican') {
+        A.sil(smooth([[150, 120], [140, 100], [100, 94], [60, 100], [40, 112], [70, 124], [130, 126]]));
+        A.sil(tube([[146, 104], [154, 80], [150, 60], [160, 46]], [16, 13, 12, 12]));
+        A.sil(ellipse(166, 44, 13, 11, 10));
+        A.near(A.part(smooth([[96, 100], [70, 104], [52, 114], [90, 116]]), C.far));
+        A.top(A.part(smooth([[176, 50], [224, 66], [200, 82], [176, 66]]), '#ffc98a', 2.2));
+        A.top(A.part(tube([[174, 46], [228, 64]], [8, 4]), '#f6a64f', 2));
+        A.eye(166, 40, 4.5);
+        return;
+      }
+      A.top(`<path d="${smooth([[20, 170], [36, 148], [120, 140], [204, 148], [220, 170]])}" fill="#8b95a8"/>`);
+      A.sil(ellipse(116, 100, 34, 44, 14));
+      A.sil(ellipse(132, 56, 24, 22, 12));
+      A.belly(smooth([[124, 62], [146, 56], [150, 76], [140, 120], [118, 140], [108, 120], [118, 82]]));
+      A.clip(`<path d="${ellipse(140, 56, 14, 12, 10)}" fill="#ffffff"/>`);
+      A.near(A.group([smooth([[96, 80], [80, 112], [92, 118], [108, 94]])], C.body));
+      A.top(A.part(smooth([[150, 48], [176, 56], [154, 72], [150, 62]]), '#ff7a3d', 2.2) + `<path d="M158 50 q-3 10 0 18" stroke="#ffd23f" stroke-width="3" fill="none"/><path d="M152 50 q-3 9 0 16" stroke="#7d8aa3" stroke-width="3" fill="none"/>`);
+      A.top(A.part(ellipse(106, 146, 10, 4, 8), '#ff7a3d', 2) + A.part(ellipse(126, 146, 10, 4, 8), '#ff7a3d', 2));
+      A.eye(140, 52, 4.5);
+    },
+
+    nudi(A) {
+      const C = A.C;
+      A.sil(smooth([[204, 128], [192, 110], [150, 102], [100, 104], [60, 114], [32, 128], [60, 136], [120, 138], [184, 136]]));
+      let s = '';
+      for (let i = 0; i < 12; i++) { const x = 52 + i * 12, y = 112 - Math.sin(i / 11 * Math.PI) * 10; s += A.part(ellipse(x, y, 6, 5, 8), C.accent, 1.6); }
+      A.back(s);
+      for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + (i - 2.5) * .4; A.back(A.part(tube([[70, 106], [70 + Math.cos(a) * 20, 106 + Math.sin(a) * 18]], [5, 3]), '#ff9a3d', 1.6)); }
+      A.sil(tube([[186, 110], [190, 86]], [7, 5]));
+      A.sil(tube([[196, 112], [202, 90]], [7, 5]));
+      A.top(`<circle cx="190" cy="86" r="3.6" fill="#ff9a3d"/><circle cx="202" cy="90" r="3.6" fill="#ff9a3d"/>`);
+      A.eye(184, 118, 4);
+      A.eye(196, 120, 4);
+      A.smile([188, 128], [196, 128], 1.5);
+    },
+
+    isopod(A) {
+      const C = A.C;
+      let lg = [];
+      for (let i = 0; i < 7; i++) lg.push(tube([[60 + i * 18, 118], [56 + i * 18, 132], [50 + i * 18, 140]], [5, 4, 3]));
+      A.far(A.group(lg, C.far));
+      A.back(`<path d="M190 96 q20 -20 30 -40 M188 104 q26 -10 40 -22" stroke="${C.ol}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
+      A.sil(ellipse(120, 106, 76, 30, 14));
+      A.sil(smooth([[50, 104], [32, 94], [26, 106], [32, 118], [50, 112]]));
+      A.clip(`<path d="${Array.from({ length: 7 }, (_, i) => `M${66 + i * 16} 76 Q${60 + i * 16} 106 ${66 + i * 16} 136`).join(' ')}" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".35"/>`);
+      A.eye(176, 98, 5.5);
+      A.eye(188, 104, 5);
+      A.smile([186, 116], [194, 114], 1.5);
+    },
+
+    horseshoe(A) {
+      const C = A.C;
+      A.sil(tube([[120, 124], [122, 168]], [9, 2]));
+      A.sil(smooth([[90, 104], [150, 104], [146, 126], [94, 126]]));
+      A.sil(smooth([[58, 104], [70, 62], [120, 44], [170, 62], [182, 104], [150, 108], [90, 108]]));
+      A.top(`<path d="M90 104 Q120 92 150 104 M120 48 V100" stroke="${C.ol}" stroke-width="2" fill="none" opacity=".35"/>`);
+      for (const x of [86, 154]) A.top(`<path d="M${x} 118 l${x < 120 ? -10 : 10} 4" stroke="${C.ol}" stroke-width="3" stroke-linecap="round"/>`);
+      A.eye(100, 72, 5);
+      A.eye(140, 72, 5);
+      A.smile([114, 84], [126, 84], 2.5);
+    },
+
+    tubeworm(A) {
+      const C = A.C;
+      A.far(`<path d="${smooth([[14, 170], [24, 90], [40, 80], [52, 96], [60, 170]])}" fill="#3b3346"/>` + `<path d="${ellipse(36, 70, 16, 10, 10, .15)}" fill="#8c8aa0" opacity=".6"/><path d="${ellipse(46, 50, 20, 12, 10, .15)}" fill="#8c8aa0" opacity=".45"/>`);
+      for (const [x, top] of [[92, 70], [116, 50], [140, 64], [164, 82], [190, 96]]) {
+        A.near(A.part(tube([[x, 156], [x + 2, top + 8]], [14, 13]), '#f4f1ea'));
+        A.near(A.part(ellipse(x + 2, top, 12, 14, 12, .14), C.body));
+      }
+      A.top(`<path d="${smooth([[0, 170], [0, 152], [120, 148], [240, 152], [240, 170]])}" fill="#4a4558"/>`);
+      A.eye(112, 50, 4); A.eye(124, 50, 4);
+    },
+
+    plankton(A) {
+      const C = A.C;
+      A.back(`<path d="M150 70 Q110 30 70 40 M150 72 Q118 50 80 66" stroke="${C.ol}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`);
+      A.sil(smooth([[146, 74], [176, 64], [196, 78], [186, 98], [156, 100], [142, 88]]));
+      A.sil(tube([[148, 92], [124, 110], [108, 124]], [8, 5, 3]));
+      A.top(`<circle cx="184" cy="76" r="4" fill="#ff5a5a" stroke="${C.ol}" stroke-width="1.6"/>`);
+      for (const [x, y, r, col] of [[60, 120, 12, '#b4d64e'], [96, 70, 8, '#f1cd52'], [200, 130, 10, '#a78ce6'], [40, 60, 7, '#f594b8'], [150, 140, 9, '#6ea9ee']]) {
+        A.top(A.part(ellipse(x, y, r, r, 10, .12), col, 2) + `<circle cx="${x}" cy="${y}" r="${r * .35}" fill="#ffffff" opacity=".6"/>`);
+      }
+      A.smile([180, 88], [188, 88], 1.5);
+    },
+  };
+
+  const HUES = {
+    green: ['#7fcf6c', '#eaf7cf', '#4c9c42'], teal: ['#52c3b2', '#dcf5ee', '#2c8f84'], blue: ['#6ea9ee', '#e0edff', '#3b74c6'],
+    sky: ['#8fd3f5', '#e8f7ff', '#4aa3d6'], purple: ['#a78ce6', '#eee7ff', '#7056c4'], pink: ['#f594b8', '#ffe6f0', '#d65f8d'],
+    orange: ['#f6a64f', '#ffeed6', '#d4742a'], yellow: ['#f1cd52', '#fff7d6', '#c4961e'], red: ['#ee7563', '#ffe4dc', '#c6493a'],
+    brown: ['#c79c6e', '#f7e9d6', '#97693f'], lime: ['#b4d64e', '#f4fad8', '#7f9f22'], gray: ['#9fb0c2', '#eef2f7', '#6d8196'],
+    navy: ['#4a5578', '#f6f8fc', '#2f3857'], white: ['#f2f6fa', '#ffffff', '#c9d6e3'], silver: ['#c3cfdb', '#f3f7fb', '#8ea2b7'],
+    cream: ['#fbefd9', '#fffaf0', '#e3a95c'],
+  };
+
+  function colorsFor(d) {
+    const [body, belly, accent0] = HUES[d.color];
+    const accent = d.f.acc ? HUES[d.f.acc][0] : accent0;
+    return {
+      body, belly, accent,
+      far: mix(body, INK, .2),
+      accentFar: mix(accent, INK, .18),
+      ol: mix(body, INK, .66),
+      fin: d.f.fins ? HUES[d.f.fins][0] : mix(accent0, '#ffffff', .18),
+      horn: '#fff3d8',
+      shell: d.color === 'navy' ? '#3a4466' : mix(accent0, INK, .08),
+      wing: mix(accent0, '#ffffff', .45),
+    };
+  }
+
+  function sceneSVG(scene, rnd) {
+    const bubbles = (pts) => pts.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#ffffff" stroke-width="1.8" opacity=".75"/>`).join('');
+    const sand = (y, col = '#f2e2b4') => `<path d="${smooth([[-10, 176], [-10, y + 6], [60, y], [120, y + 4], [180, y - 2], [250, y + 6], [250, 176]])}" fill="${col}"/>`;
+    if (scene === 'reef') {
+      const tuft = (x, col) => [[x, 156, x - 8, 132], [x, 156, x + 4, 126], [x, 156, x + 12, 138]].map(([a, b, c, e]) => `<path d="M${a} ${b} Q${(a + c) / 2 - 4} ${(b + e) / 2} ${c} ${e}" stroke="${col}" stroke-width="6" fill="none" stroke-linecap="round" opacity=".75"/>`).join('');
+      return sand(152) + tuft(18, '#ff8fab') + tuft(224, '#ffb15c') + bubbles([[204, 34, 4], [212, 20, 2.6], [30, 44, 3]]);
+    }
+    if (scene === 'open') {
+      return `<path d="M40 0 L70 0 L20 170 L0 170 Z M120 0 L140 0 L110 170 L90 170 Z M200 0 L220 0 L200 170 L180 170 Z" fill="#ffffff" opacity=".1"/>` + bubbles([[206, 40, 4], [214, 26, 2.6], [24, 130, 3]]);
+    }
+    if (scene === 'deep') {
+      let s = '';
+      for (let i = 0; i < 18; i++) s += `<circle cx="${r1(rnd() * 240)}" cy="${r1(rnd() * 170)}" r="${r1(.8 + rnd() * 1.6)}" fill="#bff3ff" opacity="${r1(.3 + rnd() * .5)}"/>`;
+      return s;
+    }
+    if (scene === 'ice') {
+      return `<path d="M-5 -5 H245 V14 L222 20 L200 12 L176 22 L150 14 L120 20 L96 12 L70 22 L44 14 L20 20 L-5 12 Z" fill="#ffffff" opacity=".92"/>` + bubbles([[200, 50, 3.5], [30, 120, 3]]);
+    }
+    if (scene === 'kelp') {
+      const kelp = (x) => `<path d="M${x} 176 Q${x - 14} 130 ${x} 96 T${x} 30" stroke="#3f9e62" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>`;
+      return `<path d="${smooth([[-10, -10], [250, -10], [250, 100], ...wave(240, 0, 102, 3, 10).slice(1, -1), [-10, 100]])}" fill="#f1fbf8" opacity=".85"/>` + kelp(22) + kelp(220);
+    }
+    if (scene === 'snow') {
+      let s = `<path d="${smooth([[-10, 176], [-10, 142], [70, 136], [150, 140], [250, 134], [250, 176]])}" fill="#ffffff"/><path d="M-10 150 Q120 144 250 148" stroke="#cfe4f3" stroke-width="3" fill="none"/>`;
+      for (let i = 0; i < 10; i++) s += `<circle cx="${r1(rnd() * 240)}" cy="${r1(rnd() * 110)}" r="2" fill="#ffffff"/>`;
+      return s;
+    }
+    if (scene === 'beach') {
+      return `<path d="${smooth([[-10, 140], [-10, 104], ...wave(0, 240, 106, 2.5, 10), [250, 104], [250, 140]])}" fill="#9fd3f0"/>` + sand(136);
+    }
+    return sand(144) + `<circle cx="60" cy="152" r="4" fill="#d9c69a"/><circle cx="188" cy="150" r="3" fill="#d9c69a"/><path d="M216 160 q-10 -18 2 -34 q10 -14 -2 -30" fill="none" stroke="#5fb87a" stroke-width="5" stroke-linecap="round"/>` + bubbles([[30, 40, 3], [204, 30, 3.5]]);
+  }
+
+  function sceneOf(d) {
+    if (['penguin', 'pinni', 'bird'].includes(d.plan)) return d.home === 'ice' ? 'snow' : 'beach';
+    if (d.plan === 'otter') return 'kelp';
+    return { reef: 'reef', open: 'open', deep: 'deep', ice: 'ice', floor: 'floor', shore: 'floor', kelp: 'kelp' }[d.home];
+  }
+
+  function drawCreature(d, uid) {
+    const C = colorsFor(d);
+    const far = [], back = [], sil = [], clip = [], near = [], top = [];
+    let box = null, bellyD = null, off = [0, 0];
+    const part = (p, fill, sw = 3.5) => `<path d="${p}" fill="${fill}" stroke="${C.ol}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const group = (paths, fill) => `<g>${paths.map(p => `<path d="${p}" fill="${C.ol}" stroke="${C.ol}" stroke-width="7" stroke-linejoin="round"/>`).join('')}${paths.map(p => `<path d="${p}" fill="${fill}"/>`).join('')}</g>`;
+    const A = {
+      C, part, group,
+      far: s => far.push(s), back: s => back.push(s), sil: p => sil.push(p), clip: s => clip.push(s), near: s => near.push(s), top: s => top.push(s),
+      box: b => { box = b; }, belly: p => { bellyD = p; }, offset: (x, y) => { off = [x, y]; },
+      eye(x, y, r) {
+        top.push(`<circle cx="${r1(x)}" cy="${r1(y)}" r="${r}" fill="#ffffff" stroke="${C.ol}" stroke-width="2.4"/>`
+          + `<circle cx="${r1(x + r * .22)}" cy="${r1(y + r * .08)}" r="${r1(r * .58)}" fill="${INK}"/>`
+          + `<circle cx="${r1(x + r * .02)}" cy="${r1(y - r * .26)}" r="${r1(r * .24)}" fill="#ffffff"/>`);
+      },
+      smile(a, b, cv = 2, teeth = null) {
+        const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + cv];
+        let s = '';
+        if (teeth) {
+          for (const u of teeth) {
+            const px = (1 - u) ** 2 * a[0] + 2 * (1 - u) * u * m[0] + u * u * b[0];
+            const py = (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * m[1] + u * u * b[1];
+            s += `<path d="M${r1(px - 2.2)} ${r1(py - 1)} L${r1(px)} ${r1(py + 3.6)} L${r1(px + 2.2)} ${r1(py - 1)}Z" fill="#ffffff" stroke="${C.ol}" stroke-width="1.4" stroke-linejoin="round"/>`;
+          }
+        }
+        top.push(s + `<path d="M${pt(a)} Q${pt(m)} ${pt(b)}" fill="none" stroke="${C.ol}" stroke-width="2.6" stroke-linecap="round"/>`);
+      },
+      cheek(x, y) { top.push(`<ellipse cx="${r1(x)}" cy="${r1(y)}" rx="5" ry="3.2" fill="#ff8fab" opacity=".45"/>`); },
+      whiskers(x, y) {
+        top.push(`<path d="M${x} ${y} l14 -4 M${x} ${y + 3} l15 1 M${x} ${y + 6} l13 5" stroke="${C.ol}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>`);
+      },
+    };
+    const scene = sceneOf(d);
+    PLANS[d.plan](A, d.f);
+    const rnd = seeded(d.name);
+    const strong = !!d.f.acc;
+    let pattern = '';
+    if (box && (d.pattern === 'spots' || d.pattern === 'whitespots')) {
+      const col = d.pattern === 'whitespots' ? '#ffffff' : C.accent;
+      for (let i = 0; i < 8; i++) pattern += `<circle cx="${r1(box[0] + rnd() * (box[2] - box[0]))}" cy="${r1(box[1] + rnd() * (box[3] - box[1]))}" r="${r1(2.6 + rnd() * 3.2)}" fill="${col}" opacity="${strong || d.pattern === 'whitespots' ? .85 : .5}"/>`;
+    } else if (box && d.pattern === 'stripes') {
+      for (let x = box[0] + 6; x < box[2]; x += 15) pattern += `<path d="M${r1(x)} ${r1(box[1] - 14)} L${r1(x - 7)} ${r1(box[3] + 4)}" stroke="${C.accent}" stroke-width="6" stroke-linecap="round" opacity="${strong ? .85 : .42}"/>`;
+    } else if (box && d.pattern === 'rings') {
+      for (let i = 0; i < 7; i++) pattern += `<circle cx="${r1(box[0] + rnd() * (box[2] - box[0]))}" cy="${r1(box[1] + rnd() * (box[3] - box[1]))}" r="${r1(3.5 + rnd() * 2.5)}" fill="none" stroke="${C.belly}" stroke-width="2.2" opacity=".85"/>`;
+    }
+    return `<svg viewBox="0 0 240 170" aria-hidden="true" focusable="false">`
+      + `<defs><clipPath id="${uid}">${sil.map(p => `<path d="${p}"/>`).join('')}</clipPath></defs>`
+      + sceneSVG(scene, rnd)
+      + `<g class="critter"><g transform="translate(${off[0]} ${off[1]})">${far.join('')}${back.join('')}${sil.length ? group(sil, C.body) : ''}`
+      + `<g clip-path="url(#${uid})">${bellyD ? `<path d="${bellyD}" fill="${C.belly}"/>` : ''}${pattern}${clip.join('')}</g>`
+      + `${near.join('')}${top.join('')}</g></g></svg>`;
+  }
+
+  // ---------- Page ----------
+
+  const THEMES = [
+    { bg: '#d4f3f1', rim: '#3cc4b8', dark: '#1f9488', accent: '#0c6f66' },
+    { bg: '#dcebff', rim: '#5ea2f5', dark: '#2e74cf', accent: '#1d5fb8' },
+    { bg: '#ffe4dc', rim: '#ff8a6b', dark: '#d95f3f', accent: '#b8432a' },
+    { bg: '#fff1cf', rim: '#f2be4a', dark: '#c98f12', accent: '#8f6300' },
+    { bg: '#ebe2ff', rim: '#9b7bf0', dark: '#6e4bd1', accent: '#5b37c4' },
+    { bg: '#dff6e6', rim: '#5fcf8f', dark: '#2f9e62', accent: '#1d7a48' },
+  ];
+  const GAP_MS = 450;
+
+  const $ = id => document.getElementById(id);
+  const scene = $('scene'), cardsEl = $('cards'), strip = $('strip'), live = $('live');
+  const titleEl = $('title'), subEl = $('sub'), blockEl = $('block'), blockLetter = $('blockLetter');
+  const hintText = $('hintText'), soundBtn = $('soundBtn'), fsBtn = $('fsBtn');
+
+  let current = [], currentLetter = null;
+
+  function applyTheme(i) {
+    const t = THEMES[i % THEMES.length], s = document.documentElement.style;
+    s.setProperty('--bg', t.bg);
+    s.setProperty('--rim', t.rim);
+    s.setProperty('--rim-dark', t.dark);
+    s.setProperty('--accent', t.accent);
+  }
+
+  function cardHTML(d, i) {
+    const [sizeText, sizeIcon] = d.size, [homeText, homeIcon] = HOME[d.home];
+    return `<button class="card" type="button" data-i="${i}" style="--i:${i}" aria-label="${d.name.replace(/"/g, '&quot;')}. ${d.fact}. ${homeText}. ${sizeText}.">`
+      + `<span class="art ${sceneOf(d)}">${drawCreature(d, `c${i}`)}<span class="hear" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 9.5v5h4l5 4v-13l-5 4z" fill="currentColor"/><path d="M16 9a4.5 4.5 0 0 1 0 6M18.6 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></span>`
+      + `<span class="info"><span class="name"><b>${d.name[0]}</b>${d.name.slice(1)}</span>`
+      + (d.pron ? `<span class="say">${d.pron}</span>` : '')
+      + `<span class="fact">${d.fact}</span>`
+      + `<span class="chips"><span class="chip">${homeText} <i>${homeIcon}</i></span><span class="chip">${sizeText} <i>${sizeIcon}</i></span></span></span>`
+      + `</button>`;
+  }
+
+  function showLetter(L, animate = true) {
+    const i = LETTERS.indexOf(L);
+    current = byLetter[L];
+    applyTheme(i);
+    scene.classList.toggle('still', !animate);
+    blockLetter.textContent = L;
+    if (animate) { blockEl.style.animation = 'none'; void blockEl.offsetWidth; blockEl.style.animation = ''; }
+    titleEl.innerHTML = `Sea creatures that start with <b>${L}</b>`;
+    subEl.textContent = `${current.length} to meet. Tap one to hear its name.`;
+    cardsEl.innerHTML = current.map(cardHTML).join('');
+    fitCards();
+    scene.scrollTop = 0;
+    live.textContent = `${L}: ${current.map(d => d.name).join(', ')}`;
+    markKey(L, animate);
+    if (animate) { chime(i); say(`${L}.`); }
+  }
+
+  // Pick the largest card size that fits this letter's creatures on one screen (scrolls if none does).
+  // Rows are kept even (8 cards make 4 + 4, not 7 + 1).
+  function fitCards() {
+    const n = current.length;
+    if (innerWidth <= 560 || !n) { cardsEl.style.removeProperty('--cw'); return; }
+    const gap = 16, W = cardsEl.clientWidth;
+    const H = scene.clientHeight - scene.querySelector('.head').offsetHeight - 40;
+    const widthFor = rows => { const cols = Math.ceil(n / rows); return Math.min(236, Math.floor((W - (cols - 1) * gap) / cols)); };
+    const tallest = () => Math.max(...[...cardsEl.children].map(c => c.offsetHeight));
+    for (let rows = 1; rows <= n; rows++) {
+      const w = widthFor(rows);
+      if (w < 150) continue;
+      cardsEl.style.setProperty('--cw', w + 'px');
+      if (rows * tallest() + (rows - 1) * gap <= H) return;
+    }
+    const rows = Math.ceil(n / Math.min(n, Math.max(1, Math.floor((W + gap) / (200 + gap)))));
+    cardsEl.style.setProperty('--cw', Math.max(150, widthFor(rows)) + 'px');
+  }
+  let fitFrame = 0;
+  addEventListener('resize', () => { cancelAnimationFrame(fitFrame); fitFrame = requestAnimationFrame(fitCards); });
+
+  let talkTimer = 0;
+  function talk(card) {
+    const d = current[+card.dataset.i];
+    if (!d) return;
+    for (const c of cardsEl.querySelectorAll('.card.now')) c.classList.remove('now');
+    card.classList.remove('talk');
+    void card.offsetWidth;
+    card.classList.add('talk', 'now');
+    clearTimeout(talkTimer);
+    talkTimer = setTimeout(() => card.classList.remove('talk'), 850);
+    card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    chime(+card.dataset.i + 2, .5);
+    say(d.say, .8);
+    live.textContent = d.name;
+  }
+
+  const randomLetter = () => {
+    let L;
+    do L = LETTERS[Math.floor(Math.random() * 26)]; while (L === currentLetter);
+    return L;
+  };
+
+  // ---------- Alphabet strip ----------
+
+  const keys = {};
+  [...LETTERS].forEach((L, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'key';
+    b.textContent = L;
+    b.setAttribute('aria-label', `Sea creatures that start with ${L}`);
+    b.style.setProperty('--c', THEMES[i % THEMES.length].rim);
+    b.addEventListener('click', () => trigger(() => showLetter(L)));
+    strip.append(b);
+    keys[L] = b;
+  });
+
+  function markKey(L, seen = true) {
+    if (currentLetter) keys[currentLetter].classList.remove('now');
+    currentLetter = L;
+    keys[L].classList.add('now');
+    if (seen) keys[L].classList.add('seen');
+  }
+
+  // ---------- Sound ----------
+
+  let soundOn = true;
+  try { soundOn = localStorage.getItem('ocean-sound') !== 'off'; } catch {}
+  let actx = null;
+
+  function chime(i, octave = 1) {
+    if (!soundOn || !actx) return;
+    try {
+      const steps = [0, 2, 4, 7, 9];
+      const semi = steps[i % 5] + 12 * (Math.floor(i / 5) % 2);
+      const f = 392 * octave * Math.pow(2, semi / 12);
+      const t = actx.currentTime;
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.2, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      g.connect(actx.destination);
+      for (const [mult, type, level] of [[1, 'triangle', 1], [2, 'sine', 0.3]]) {
+        const o = actx.createOscillator(), og = actx.createGain();
+        o.type = type;
+        o.frequency.value = f * mult;
+        og.gain.value = level;
+        o.connect(og).connect(g);
+        o.start(t);
+        o.stop(t + 0.65);
+      }
+    } catch {}
+  }
+
+  const canSpeak = 'speechSynthesis' in window;
+  let voice = null, speakTimer = 0;
+  function pickVoice() {
+    try {
+      const en = speechSynthesis.getVoices().filter(v => /^en([-_]|$)/i.test(v.lang));
+      voice = en.find(v => /Samantha|Google US English|Aria|Jenny|Ava|Karen|Serena/i.test(v.name))
+        || en.find(v => v.default) || en[0] || null;
+    } catch {}
+  }
+  if (canSpeak) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+
+  function say(text, rate = 0.85) {
+    if (!soundOn || !canSpeak) return;
+    clearTimeout(speakTimer);
+    try { speechSynthesis.cancel(); } catch {}
+    speakTimer = setTimeout(() => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+        u.rate = rate;
+        u.pitch = 1.15;
+        speechSynthesis.speak(u);
+      } catch {}
+    }, 200);
+  }
+
+  function setSound(on) {
+    soundOn = on;
+    soundBtn.setAttribute('aria-pressed', String(on));
+    soundBtn.querySelector('span').textContent = on ? 'Sound on' : 'Sound off';
+    if (!on && canSpeak) { clearTimeout(speakTimer); try { speechSynthesis.cancel(); } catch {} }
+    try { localStorage.setItem('ocean-sound', on ? 'on' : 'off'); } catch {}
+  }
+  soundBtn.addEventListener('click', () => { wake(); setSound(!soundOn); });
+  setSound(soundOn);
+
+  // ---------- Input ----------
+
+  let lastAt = 0, lastTalk = 0, wakeLock = null;
+
+  function wake() {
+    if (!actx) {
+      try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+    }
+    if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
+    if (!wakeLock && navigator.wakeLock) {
+      navigator.wakeLock.request('screen').then(l => {
+        wakeLock = l;
+        l.addEventListener('release', () => { wakeLock = null; });
+      }).catch(() => {});
+    }
+  }
+
+  function trigger(fn) {
+    const now = performance.now();
+    if (now - lastAt < GAP_MS) return;
+    lastAt = now;
+    wake();
+    fn();
+  }
+
+  function talkTo(card) {
+    const now = performance.now();
+    if (!card || now - lastTalk < 250) return;
+    lastTalk = now;
+    wake();
+    card.focus({ preventScroll: true });
+    talk(card);
+  }
+
+  cardsEl.addEventListener('click', e => talkTo(e.target.closest('.card')));
+
+  addEventListener('keydown', e => {
+    if (/^F\d{1,2}$/.test(e.key)) return; // leave F5 / F11 for grown-ups
+    e.preventDefault();
+    if (e.repeat) return;
+    const ch = e.key && e.key.length === 1 ? e.key.toUpperCase() : '';
+    const cards = [...cardsEl.querySelectorAll('.card')];
+    const at = cards.indexOf(document.activeElement);
+    let m;
+    if (/^[A-Z]$/.test(ch)) trigger(() => showLetter(ch));
+    else if ((m = /^Key([A-Z])$/.exec(e.code))) trigger(() => showLetter(m[1]));
+    else if (/^[0-9]$/.test(ch)) talkTo(cards[ch === '0' ? 9 : +ch - 1]);
+    else if ((m = /^(?:Digit|Numpad)([0-9])$/.exec(e.code))) talkTo(cards[m[1] === '0' ? 9 : +m[1] - 1]);
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') talkTo(cards[(at + 1) % cards.length]);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') talkTo(cards[(at - 1 + cards.length) % cards.length]);
+    else if ((e.key === 'Enter' || e.key === ' ') && at >= 0) talkTo(cards[at]);
+    else trigger(() => showLetter(randomLetter())); // other keys still do something
+  });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  function syncFocus() {
+    const focused = document.hasFocus();
+    document.body.classList.toggle('away', !focused);
+    hintText.textContent = focused ? 'Press a letter, then tap a sea creature' : 'Tap or click to start';
+  }
+  addEventListener('focus', syncFocus);
+  addEventListener('blur', syncFocus);
+  syncFocus();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && lastAt) wake();
+  });
+
+  // ---------- Full screen ----------
+
+  if (!document.fullscreenEnabled) fsBtn.hidden = true;
+  fsBtn.addEventListener('click', async () => {
+    wake();
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else {
+        await document.documentElement.requestFullscreen();
+        try { await navigator.keyboard?.lock?.(); } catch {}
+      }
+    } catch {}
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const on = !!document.fullscreenElement;
+    fsBtn.setAttribute('aria-pressed', String(on));
+    fsBtn.querySelector('span').textContent = on ? 'Exit full screen' : 'Full screen';
+  });
+
+  showLetter('O', false);
+  window.__ocean = { CREATURES, drawCreature, byLetter, sceneOf }; // used by the preview-image script
+})();
+</script>
+</body>
+</html>
