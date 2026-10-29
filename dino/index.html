@@ -1,0 +1,1564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dino ABC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A dinosaur game for babies and toddlers. Press a letter to meet the dinosaurs that start with it, then tap one to hear its name, from Allosaurus to Zuul.">
+<meta name="theme-color" content="#d7f5e7">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='12' fill='%234ccb94'/%3E%3Crect x='11' y='11' width='42' height='42' rx='8' fill='%23fffdf8'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial Rounded MT Bold,Arial,sans-serif' font-weight='700' font-size='34' fill='%230f7a50'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/dino/apple-touch-icon.png">
+<!-- Link previews. If the game moves away from https://grabe.com/dino/, change these URLs. -->
+<link rel="canonical" href="https://grabe.com/dino/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://grabe.com/dino/">
+<meta property="og:title" content="Dino ABC · A dinosaur for every letter">
+<meta property="og:description" content="Press a letter to meet the dinosaurs that start with it, then tap one to hear its name. 120+ dinosaurs, from Allosaurus to Zuul.">
+<meta property="og:image" content="https://grabe.com/dino/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Cartoon dinosaurs on cards: a Tyrannosaurus rex, a Triceratops and a Brachiosaurus, with the words Dino ABC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dino ABC · A dinosaur for every letter">
+<meta name="twitter:description" content="Press a letter to meet the dinosaurs that start with it, then tap one to hear its name. 120+ dinosaurs, from Allosaurus to Zuul.">
+<meta name="twitter:image" content="https://grabe.com/dino/og-image.png">
+<meta name="twitter:image:alt" content="Cartoon dinosaurs on cards: a Tyrannosaurus rex, a Triceratops and a Brachiosaurus, with the words Dino ABC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800&family=Noto+Color+Emoji&display=swap">
+<style>
+/* Layout: a letter block and a heading on top, a wrap of dinosaur cards below (scrolls when
+   a letter has many), the alphabet along the bottom. Single bright theme: the background
+   changes colour with each letter, like the A is for Apple game. */
+:root {
+  --ink: #2d2440;
+  --ink-soft: #625a76;
+  --face: #fffdf8;
+  --bg: #d7f5e7;
+  --rim: #4ccb94;
+  --rim-dark: #229c68;
+  --accent: #0f7a50;
+  --shadow: rgba(45, 36, 64, .16);
+  --land: #fff5e1;
+  --sky: #e3f0ff;
+  --sea: #cbe7fb;
+  --sea-deep: #9fd0f1;
+  --font-display: "Fredoka", "Baloo 2", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  color-scheme: light;
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+  transition: background-color .5s ease;
+}
+*, *::before, *::after { box-sizing: inherit; }
+
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  transition: background-color .5s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.stage {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 16px;
+}
+
+/* Top bar */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  font: 800 clamp(13px, 1.7vmin, 16px)/1.2 var(--font-ui);
+  color: var(--ink-soft);
+  transition: background-color .3s, color .3s;
+}
+.hint kbd {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--face);
+  box-shadow: 0 3px 0 var(--rim-dark);
+  font: 600 16px/1 var(--font-display);
+  color: var(--accent);
+}
+.away .hint {
+  background: var(--ink);
+  color: var(--face);
+  animation: nudge 1.6s ease-in-out infinite;
+}
+.controls { display: flex; gap: 8px; flex: none; }
+.ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--face) 72%, transparent);
+  color: var(--ink);
+  font: 800 14px/1 var(--font-ui);
+  cursor: pointer;
+}
+.ctrl:hover { background: var(--face); }
+.ctrl svg { width: 22px; height: 22px; flex: none; }
+.ctrl .off, .ctrl[aria-pressed="false"] .on { display: none; }
+.ctrl[aria-pressed="false"] .off { display: inline; }
+button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* Scene */
+.scene {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2.4vmin, 22px);
+  padding: 6px 4px 14px;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.6vmin, 24px);
+}
+.head h1 {
+  margin: 0;
+  font: 600 clamp(22px, 4.4vmin, 42px)/1.05 var(--font-display);
+  color: var(--ink);
+  text-wrap: balance;
+}
+.head h1 b { color: var(--accent); font-weight: 700; }
+.head p {
+  margin: 6px 0 0;
+  font: 700 clamp(13px, 1.9vmin, 17px)/1.3 var(--font-ui);
+  color: var(--ink-soft);
+}
+
+/* A wooden alphabet block, as in the ABC game */
+.block {
+  --s: clamp(64px, 12vmin, 104px);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  border-radius: calc(var(--s) * .16);
+  background: var(--face);
+  box-shadow:
+    inset 0 0 0 calc(var(--s) * .065) var(--rim),
+    0 calc(var(--s) * .055) 0 var(--rim-dark),
+    0 calc(var(--s) * .1) calc(var(--s) * .09) var(--shadow);
+  font: 600 calc(var(--s) * .64)/1 var(--font-display);
+  color: var(--accent);
+}
+.block::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--s) * .13);
+  border-radius: calc(var(--s) * .07);
+  border: calc(var(--s) * .014) solid color-mix(in srgb, var(--rim) 45%, transparent);
+}
+.block span { position: relative; }
+
+/* Dinosaur cards */
+.cards {
+  --cw: clamp(160px, 19vw, 236px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+}
+.card {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: var(--cw);
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--face);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--rim-dark) 45%, transparent), 0 10px 22px var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+  animation: cardIn .45s calc(var(--i) * 60ms) cubic-bezier(.3, 1.4, .5, 1) both;
+}
+.card:hover { transform: translateY(-3px); }
+.card:active { transform: translateY(2px); }
+.card.now { box-shadow: 0 0 0 4px var(--rim), 0 4px 0 4px var(--rim-dark), 0 10px 22px var(--shadow); }
+.art {
+  position: relative;
+  display: block;
+  aspect-ratio: 240 / 170;
+  background: var(--land);
+}
+.art.sky { background: var(--sky); }
+.art.sea { background: linear-gradient(var(--sea), var(--sea-deep)); }
+.art svg { display: block; width: 100%; height: 100%; }
+.hear {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--face) 85%, transparent);
+  color: var(--ink);
+}
+.hear svg { width: 18px; height: 18px; }
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px 14px;
+}
+.name {
+  font: 600 clamp(16px, 9.2cqi, 23px)/1.1 var(--font-display);
+  color: var(--ink);
+}
+.name b { color: var(--accent); font-weight: 700; }
+.say {
+  font: 800 12px/1.25 var(--font-ui);
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rim) 20%, var(--face));
+  font: 800 11.5px/1.1 var(--font-ui);
+  color: var(--ink);
+}
+.chip i { font-style: normal; font-family: var(--font-emoji); }
+
+.dino {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: breathe 3.4s calc(var(--i) * -.7s) ease-in-out infinite;
+}
+.card.talk .dino { animation: hop .8s cubic-bezier(.3, 1.4, .5, 1); }
+.still .card { animation: none; }
+
+@keyframes cardIn {
+  from { transform: translateY(24px) scale(.85); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes breathe {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.012, .985); }
+}
+@keyframes hop {
+  0% { transform: none; }
+  25% { transform: translateY(2%) scale(1.06, .9); }
+  55% { transform: translateY(-12%) scale(.96, 1.06); }
+  80% { transform: translateY(1%) scale(1.04, .95); }
+  100% { transform: none; }
+}
+@keyframes pop {
+  from { transform: scale(.3) rotate(-14deg); opacity: 0; }
+  60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  to { transform: none; }
+}
+@keyframes nudge {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.04); }
+}
+@keyframes fade { from { opacity: 0; } }
+.head .block { animation: pop .55s cubic-bezier(.3, 1.5, .5, 1) both; }
+.still .head .block { animation: none; }
+
+/* Alphabet strip */
+.strip {
+  --kg: 4px;
+  --k: min(42px, calc((100vw - 32px - 25 * var(--kg)) / 26));
+  display: grid;
+  grid-template-columns: repeat(26, var(--k));
+  gap: var(--kg);
+  justify-content: center;
+}
+.key {
+  width: var(--k);
+  height: var(--k);
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-radius: 30%;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  font: 600 calc(var(--k) * .5)/1 var(--font-display);
+  cursor: pointer;
+  transition: background-color .3s, color .3s, transform .2s;
+}
+.key.seen { background: var(--c); border-color: transparent; color: var(--ink); }
+.key.now { transform: translateY(-4px); border-color: var(--ink); }
+
+.sr { position: absolute; top: 0; left: 0; margin: 0; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 820px) {
+  .strip {
+    --k: min(40px, calc((100vw - 32px - 12 * var(--kg)) / 13));
+    grid-template-columns: repeat(13, var(--k));
+  }
+}
+@media (max-width: 560px) {
+  .cards { --cw: calc((100vw - 32px - 20px) / 2); gap: 12px; }
+  .info { padding: 8px 10px 12px; }
+  .say { font-size: 11px; }
+  .chip { font-size: 10.5px; padding: 4px 7px; }
+  .ctrl { padding: 0; width: 44px; justify-content: center; }
+  .ctrl span { display: none; }
+}
+@media (max-height: 460px) {
+  .strip { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .head .block, .dino, .card.talk .dino, .away .hint { animation: fade .3s both !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="top">
+    <p class="hint"><kbd aria-hidden="true">B</kbd><span id="hintText">Press a letter, then tap a dinosaur</span></p>
+    <div class="controls">
+      <button class="ctrl" id="soundBtn" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3.5 9.5v5h4l5 4v-13l-5 4z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <g class="on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9a4.5 4.5 0 0 1 0 6"/><path d="M18.6 6.5a8 8 0 0 1 0 11"/></g>
+          <g class="off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g>
+        </svg>
+        <span>Sound on</span>
+      </button>
+      <button class="ctrl" id="fsBtn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <g class="on"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></g>
+          <g class="off"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></g>
+        </svg>
+        <span>Full screen</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="scene still" id="scene">
+    <div class="head">
+      <div class="block" id="block"><span id="blockLetter">B</span></div>
+      <div>
+        <h1 id="title">Dinosaurs that start with <b>B</b></h1>
+        <p id="sub">Tap one to hear its name.</p>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <nav class="strip" id="strip" aria-label="Alphabet"></nav>
+</div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<script>
+(() => {
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  // name | how to say it | body plan | drawing flags | colour | pattern | diet | size | spoken (optional)
+  const ROWS = [
+    'Allosaurus|AL-oh-SOR-us|thero|brow arms=small|orange|stripes|m|truck',
+    'Albertosaurus|al-BER-toh-SOR-us|thero||red|spots|m|truck',
+    'Amargasaurus|ah-MAR-gah-SOR-us|sauro|spines neck=high|yellow|spots|p|bus',
+    'Ankylosaurus|an-KY-loh-SOR-us|ankylo|club|brown|none|p|truck',
+    'Apatosaurus|ah-PAT-oh-SOR-us|sauro||purple|spots|p|bus2',
+    'Archaeopteryx|ar-kee-OP-ter-iks|raptor|feathers=full|teal|none|bird|chicken|Ar kee op ter ix',
+    'Argentinosaurus|ar-jen-TEE-noh-SOR-us|sauro|neck=high long|green|stripes|p|bus3',
+
+    'Baryonyx|bar-ee-ON-iks|thero|snout=long arms=small|green|spots|f|truck',
+    'Barosaurus|BAR-oh-SOR-us|sauro|neck=high long|orange|none|p|bus2',
+    'Borealopelta|bor-ee-AL-oh-PEL-tah|ankylo|spikes=shoulder|red|none|p|car|Bore ee al oh pel ta',
+    'Brachiosaurus|BRAK-ee-oh-SOR-us|sauro|neck=up front crest|teal|spots|p|bus2',
+    'Brachylophosaurus|brak-ee-LOF-oh-SOR-us|hadro|crest=flat|yellow|stripes|p|bus|Brack ee loff oh saurus',
+    'Brontosaurus|BRON-toh-SOR-us|sauro||blue|spots|p|bus2',
+
+    'Carnotaurus|KAR-noh-TOR-us|thero|horns arms=tiny|red|spots|m|truck',
+    'Centrosaurus|SEN-troh-SOR-us|cerato|brow=none nose=long frill=med|orange|none|p|car',
+    'Ceratosaurus|seh-RAT-oh-SOR-us|thero|nosehorn brow|yellow|stripes|m|truck',
+    'Chasmosaurus|KAZ-moh-SOR-us|cerato|brow=short nose=short frill=big|pink|spots|p|car',
+    'Coelophysis|SEE-loh-FY-sis|raptor|feathers=none|lime|stripes|m|horse|See lo fy sis',
+    'Compsognathus|komp-sog-NAY-thus|raptor|feathers=none|green|spots|m|chicken|Comp sog nay thus',
+    'Corythosaurus|koh-RITH-oh-SOR-us|hadro|crest=helmet|blue|stripes|p|bus',
+
+    'Deinonychus|dy-NON-ih-kus|raptor|feathers=arms sickle|blue|none|m|horse|Dy non ih kus',
+    'Dilophosaurus|dy-LOF-oh-SOR-us|thero|crest2|green|stripes|m|truck',
+    'Dimetrodon|dy-MET-roh-don|dimetro||orange|stripes|old|horse',
+    'Dimorphodon|dy-MOR-foh-don|ptero|head=big tail=long teeth|yellow|none|fly|umbrella',
+    'Diplodocus|dih-PLOD-oh-kus|sauro|long|green|stripes|p|bus2',
+    'Dracorex|DRAY-koh-reks|small|dome=spiky|purple|spots|p|dog',
+
+    'Edmontosaurus|ed-MON-toh-SOR-us|hadro|crest=none|teal|spots|p|bus',
+    'Einiosaurus|EYE-nee-oh-SOR-us|cerato|brow=none nose=curve frill=med spikes=2|yellow|none|p|car|Eye nee oh saurus',
+    'Elasmosaurus|ee-LAZ-moh-SOR-us|marine|kind=plesio neck=vlong|blue|none|sea|bus',
+    'Eoraptor|EE-oh-RAP-tor|raptor|feathers=none|orange|stripes|m|dog',
+    'Euoplocephalus|YOO-oh-ploh-SEF-ah-lus|ankylo|club|green|none|p|car|You oh plo seff a lus',
+
+    'Falcarius|fal-KAIR-ee-us|therizino|claws=med|orange|stripes|p|horse',
+    'Fruitadens|FROO-tah-denz|small||lime|spots|o|chicken|Froo ta dens',
+    'Fukuiraptor|FOO-kwee-RAP-tor|raptor|feathers=arms|red|stripes|m|horse|Foo kwee raptor',
+
+    'Gallimimus|gal-ih-MY-mus|raptor|neck=long beak feathers=none|yellow|none|o|car',
+    'Gastonia|gas-TOH-nee-ah|ankylo|spikes=side|orange|none|p|car',
+    'Giganotosaurus|jig-ah-NOH-toh-SOR-us|thero|arms=small|blue|stripes|m|bus|Jig a no toe saurus',
+    'Gigantspinosaurus|jy-GANT-spy-noh-SOR-us|stego|plates=small shoulder=big|purple|none|p|car|Jy gant spy no saurus',
+    'Gryposaurus|GRIP-oh-SOR-us|hadro|crest=nose|green|stripes|p|truck',
+
+    'Hadrosaurus|HAD-roh-SOR-us|hadro|crest=bump|orange|spots|p|truck',
+    'Herrerasaurus|heh-RAIR-ah-SOR-us|thero|arms=small|yellow|stripes|m|car|Heh rare a saurus',
+    'Homalocephale|HOM-ah-loh-SEF-ah-lee|small|dome=flat|teal|spots|p|dog|Homa lo seff a lee',
+    'Huayangosaurus|hwah-YANG-oh-SOR-us|stego|plates=small shoulder|red|none|p|car|Hwah yang oh saurus',
+    'Hypsilophodon|hip-sih-LOF-oh-don|small||green|stripes|p|dog',
+
+    'Ichthyosaurus|IK-thee-oh-SOR-us|marine|kind=ichthyo|blue|none|sea|horse',
+    'Iguanodon|ih-GWAH-noh-don|hadro|crest=none nobill thumb|green|spots|p|bus',
+    'Incisivosaurus|in-SY-sih-voh-SOR-us|raptor|feathers=full buck beak|orange|none|p|chicken|In sigh sih vo saurus',
+    'Irritator|IR-ih-tay-tor|thero|snout=long nosecrest|yellow|spots|f|truck',
+
+    'Jaxartosaurus|jak-SAR-toh-SOR-us|hadro|crest=small|purple|stripes|p|truck|Jack sar toe saurus',
+    'Jeholopterus|jeh-hol-OP-ter-us|ptero|fuzzy head=wide teeth|brown|none|fly|umbrella|Jeh hol op ter us',
+    'Jobaria|joh-BAR-ee-ah|sauro|neck=high|orange|spots|p|bus2',
+    'Juravenator|JOOR-ah-veh-NAY-tor|raptor|feathers=full|green|stripes|m|chicken|Joo ra veh nay tor',
+
+    'Kentrosaurus|KEN-troh-SOR-us|stego|plates=spiky|yellow|none|p|car',
+    'Kosmoceratops|KOZ-moh-SER-ah-tops|cerato|brow=short nose=short frill=med hooks|teal|none|p|car|Koz mo serra tops',
+    'Kritosaurus|KRIT-oh-SOR-us|hadro|crest=nose|orange|spots|p|truck',
+    'Kronosaurus|KROH-noh-SOR-us|marine|kind=pliosaur|purple|spots|sea|bus',
+
+    'Lambeosaurus|LAM-bee-oh-SOR-us|hadro|crest=hatchet|pink|stripes|p|bus',
+    'Leaellynasaura|lee-EL-in-ah-SOR-ah|small|longtail bigeye|teal|none|p|dog|Lee ellin a saura',
+    'Leptoceratops|LEP-toh-SER-ah-tops|cerato|brow=none nose=none frill=small|lime|spots|p|dog|Lep toe serra tops',
+    'Liopleurodon|LY-oh-PLOOR-oh-don|marine|kind=pliosaur|blue|none|sea|truck',
+
+    'Maiasaura|MY-ah-SOR-ah|hadro|crest=bump|green|spots|p|truck',
+    'Mamenchisaurus|mah-MEN-chee-SOR-us|sauro|neck=high long|yellow|stripes|p|bus2|Ma men chee saurus',
+    'Megalosaurus|MEG-ah-loh-SOR-us|thero|arms=small|brown|stripes|m|truck',
+    'Microraptor|MY-kroh-RAP-tor|raptor|feathers=full legwings sickle|blue|none|m|chicken',
+    'Minmi|MIN-mee|ankylo||teal|none|p|dog',
+    'Mosasaurus|MOH-zah-SOR-us|marine|kind=mosa|teal|stripes|sea|bus',
+    'Muttaburrasaurus|MUT-ah-BUR-ah-SOR-us|hadro|crest=nose nobill thumb|orange|none|p|truck',
+
+    'Nasutoceratops|nah-SOO-toh-SER-ah-tops|cerato|brow=long nose=none frill=med|orange|none|p|car|Na soo toe serra tops',
+    'Nodosaurus|NOH-doh-SOR-us|ankylo||brown|none|p|car',
+    'Nothronychus|NOTH-roh-NY-kus|therizino|claws=med fuzzy|green|none|p|car|Noth ro nye kus',
+    'Nyctosaurus|NIK-toh-SOR-us|ptero|crest=antler|pink|none|fly|bed|Nick toe saurus',
+
+    'Olorotitan|oh-LOR-oh-TY-tan|hadro|crest=fan|purple|spots|p|truck',
+    'Ornithomimus|or-NITH-oh-MY-mus|raptor|neck=long beak feathers=arms|orange|none|o|horse',
+    'Ouranosaurus|oo-RAN-oh-SOR-us|hadro|sail crest=none|yellow|stripes|p|truck|Oo ran oh saurus',
+    'Oviraptor|OH-vih-RAP-tor|raptor|crest beak feathers=full|pink|none|o|dog',
+
+    'Pachycephalosaurus|PAK-ee-SEF-ah-loh-SOR-us|small|dome=round|orange|spots|p|car',
+    'Pachyrhinosaurus|PAK-ee-RY-noh-SOR-us|cerato|brow=none nose=boss frill=med spikes=2|green|none|p|truck',
+    'Parasaurolophus|PAR-ah-sor-OL-oh-fus|hadro|crest=tube|teal|stripes|p|bus',
+    'Plesiosaurus|PLEE-see-oh-SOR-us|marine|kind=plesio|teal|spots|sea|horse',
+    'Protoceratops|PROH-toh-SER-ah-tops|cerato|brow=none nose=none frill=med|yellow|spots|p|dog',
+    'Psittacosaurus|SIT-ah-koh-SOR-us|small|beak cheek bristles|lime|none|p|dog|Sit a co saurus',
+    'Pteranodon|teh-RAN-oh-don|ptero|crest=back|orange|none|fly|truck|Terra no don',
+
+    'Qianzhousaurus|chyen-JOH-SOR-us|thero|snout=long arms=tiny|orange|stripes|m|truck|Chyen joe saurus',
+    'Quaesitosaurus|kwee-SEE-toh-SOR-us|sauro|neck=high|purple|spots|p|bus2|Kwee see toe saurus',
+    'Quetzalcoatlus|KWET-sal-koh-AT-lus|ptero|neck=long crest=small|yellow|none|fly|bus|Kwet sal ko at lus',
+
+    'Rajasaurus|RAH-jah-SOR-us|thero|nosecrest arms=tiny|red|spots|m|truck|Rah ja saurus',
+    'Rebbachisaurus|reh-BASH-ih-SOR-us|sauro|ridge|orange|none|p|bus2|Reh bash ih saurus',
+    'Rhamphorhynchus|RAM-foh-RINK-us|ptero|tail=long teeth|teal|none|fly|bed|Ram fo rink us',
+    'Rugops|ROO-gops|thero|nosecrest arms=tiny|purple|spots|m|truck|Roo gops',
+
+    'Saurolophus|sor-OL-oh-fus|hadro|crest=spike|orange|spots|p|bus',
+    'Sauropelta|SOR-oh-PEL-tah|ankylo|spikes=shoulder|yellow|none|p|car',
+    'Spinosaurus|SPY-noh-SOR-us|thero|sail snout=long|red|stripes|f|bus',
+    'Stegosaurus|STEG-oh-SOR-us|stego|plates=big|green|spots|p|truck',
+    'Stygimoloch|STIJ-ih-MOH-lok|small|dome=spiky|red|none|p|horse|Stidgy mo lock',
+    'Styracosaurus|sty-RAK-oh-SOR-us|cerato|brow=none nose=long frill=med spikes=6|blue|none|p|car',
+    'Suchomimus|SOO-koh-MY-mus|thero|snout=long ridge|teal|spots|f|bus',
+
+    'Tapejara|tah-peh-ZHAR-ah|ptero|crest=sail|pink|none|fly|bed|Ta peh zhar ah',
+    'Tenontosaurus|teh-NON-toh-SOR-us|hadro|crest=none nobill|brown|stripes|p|truck',
+    'Therizinosaurus|THER-ih-ZEEN-oh-SOR-us|therizino|claws=huge fuzzy|purple|none|p|bus|Ther ih zeen oh saurus',
+    'Torosaurus|TOR-oh-SOR-us|cerato|brow=long nose=short frill=big|teal|none|p|truck',
+    'Triceratops|try-SER-ah-tops|cerato|brow=long nose=short frill=med|orange|none|p|truck',
+    'Troodon|TROH-oh-don|raptor|feathers=full bigeye|yellow|none|o|dog',
+    'Tsintaosaurus|ching-DOW-SOR-us|hadro|crest=unicorn|blue|spots|p|truck|Ching dow saurus',
+    'Tyrannosaurus rex|tie-RAN-oh-SOR-us REKS|thero|arms=tiny|green|stripes|m|bus',
+
+    'Udanoceratops|oo-DAN-oh-SER-ah-tops|cerato|brow=none nose=none frill=small|orange|spots|p|car|Oo dan oh serra tops',
+    'Unenlagia|oo-nen-LAH-gee-ah|raptor|feathers=full sickle|teal|none|m|dog|Oo nen lah ghee ah',
+    'Utahraptor|YOO-tah-RAP-tor|raptor|feathers=arms sickle|red|stripes|m|car',
+
+    'Velafrons|VEL-ah-fronz|hadro|crest=small|green|stripes|p|truck|Vela fronz',
+    'Velociraptor|veh-LOS-ih-RAP-tor|raptor|feathers=full sickle|orange|stripes|m|dog',
+    'Vulcanodon|vul-KAN-oh-don|sauro||red|spots|p|truck',
+
+    'Wannanosaurus|wah-NAN-oh-SOR-us|small|dome=flat|orange|spots|p|chicken|Wa nan oh saurus',
+    'Wendiceratops|WEN-dee-SER-ah-tops|cerato|brow=none nose=short frill=med hooks|purple|none|p|car|Wendy serra tops',
+    'Wuerhosaurus|WER-hoh-SOR-us|stego|plates=low|teal|none|p|truck|Wur ho saurus',
+
+    'Xenoceratops|ZEE-noh-SER-ah-tops|cerato|brow=short nose=none frill=med spikes=4|yellow|none|p|car|Zee no serra tops',
+    'Xiaosaurus|shyow-SOR-us|small||teal|stripes|p|chicken|Shyow saurus',
+    'Xuanhanosaurus|shwahn-HAN-oh-SOR-us|thero|arms=small|purple|stripes|m|car|Shwan han oh saurus',
+
+    'Yangchuanosaurus|YANG-chwahn-oh-SOR-us|thero|nosecrest|orange|stripes|m|truck|Yang chwan oh saurus',
+    'Yinlong|YIN-long|small|beak frill|green|spots|p|dog',
+    'Yutyrannus|YOO-tie-RAN-us|thero|feathers arms=tiny|brown|none|m|truck|You tie ran us',
+
+    'Zalmoxes|zal-MOK-seez|small||purple|stripes|p|dog|Zal mox eez',
+    'Zephyrosaurus|ZEF-ih-roh-SOR-us|small|bigeye|yellow|spots|p|dog',
+    'Zuniceratops|ZOO-nee-SER-ah-tops|cerato|brow=long nose=none frill=small|red|spots|p|horse|Zoo nee serra tops',
+    'Zuul|ZOOL|ankylo|club|orange|none|p|car|Zool',
+  ];
+
+  const DIET = {
+    p: 'Plant eater 🌿', m: 'Meat eater 🍖', f: 'Fish eater 🐟', o: 'Ate plants and meat',
+    bird: 'Early bird 🪶', fly: 'Flying reptile', sea: 'Sea reptile 🌊', old: 'Lived before dinosaurs',
+  };
+  const SIZE = {
+    chicken: ['As big as a chicken', '🐔'], dog: ['As big as a dog', '🐕'], horse: ['As long as a horse', '🐴'],
+    car: ['As long as a car', '🚗'], truck: ['As long as a truck', '🚚'], bus: ['As long as a bus', '🚌'],
+    bus2: ['As long as 2 buses', '🚌'], bus3: ['As long as 3 buses', '🚌'],
+    umbrella: ['Wings as wide as an umbrella', '☂️'], bed: ['Wings as wide as a bed', '🛏️'],
+  };
+  const WING_SIZE = { truck: ['Wings as wide as a truck', '🚚'], bus: ['Wings as wide as a bus', '🚌'] };
+
+  const DINOS = ROWS.map(row => {
+    const [name, pron, plan, flags, color, pattern, diet, size, say] = row.split('|');
+    const f = {};
+    for (const t of flags.split(' ').filter(Boolean)) {
+      const [k, v] = t.split('=');
+      f[k] = v === undefined ? true : v;
+    }
+    const sz = (diet === 'fly' && WING_SIZE[size]) || SIZE[size];
+    return { name, pron, plan, f, color, pattern, diet, size: sz, say: say || name };
+  });
+  const byLetter = {};
+  for (const L of LETTERS) byLetter[L] = DINOS.filter(d => d.name[0] === L);
+
+  // ---------- Drawing: every dinosaur is built from a few smooth shapes ----------
+
+  const GY = 154; // ground line in the 240 x 170 picture
+  const INK = '#2d2440';
+  const r1 = n => Math.round(n * 10) / 10;
+
+  function mix(a, b, t) {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch = s => Math.round(((pa >> s) & 255) * (1 - t) + ((pb >> s) & 255) * t);
+    return '#' + ((1 << 24) + (ch(16) << 16) + (ch(8) << 8) + ch(0)).toString(16).slice(1);
+  }
+
+  // Closed (or open) Catmull-Rom curve through the points.
+  function smooth(p, closed = true) {
+    const n = p.length;
+    const g = i => closed ? p[(i + n) % n] : p[Math.min(n - 1, Math.max(0, i))];
+    let d = `M${r1(p[0][0])} ${r1(p[0][1])}`;
+    for (let i = 0; i < (closed ? n : n - 1); i++) {
+      const a = g(i - 1), b = g(i), c = g(i + 1), e = g(i + 2);
+      d += `C${r1(b[0] + (c[0] - a[0]) / 6)} ${r1(b[1] + (c[1] - a[1]) / 6)} ${r1(c[0] - (e[0] - b[0]) / 6)} ${r1(c[1] - (e[1] - b[1]) / 6)} ${r1(c[0])} ${r1(c[1])}`;
+    }
+    return closed ? d + 'Z' : d;
+  }
+
+  // A soft sausage along a centre line, with a width at each point.
+  function tube(c, w) {
+    const n = c.length, L = [], R = [];
+    let t0 = [1, 0], t1 = [1, 0];
+    for (let i = 0; i < n; i++) {
+      const a = c[Math.max(0, i - 1)], b = c[Math.min(n - 1, i + 1)];
+      let tx = b[0] - a[0], ty = b[1] - a[1];
+      const m = Math.hypot(tx, ty) || 1;
+      tx /= m; ty /= m;
+      if (i === 0) t0 = [tx, ty];
+      if (i === n - 1) t1 = [tx, ty];
+      const h = w[i] / 2;
+      L.push([c[i][0] - ty * h, c[i][1] + tx * h]);
+      R.push([c[i][0] + ty * h, c[i][1] - tx * h]);
+    }
+    const s = c[0], e = c[n - 1], hs = w[0] / 2, he = w[n - 1] / 2;
+    const pts = [...L];
+    if (he > 1.5) pts.push([e[0] + t1[0] * he * .8, e[1] + t1[1] * he * .8]);
+    pts.push(...R.reverse());
+    if (hs > 1.5) pts.push([s[0] - t0[0] * hs * .8, s[1] - t0[1] * hs * .8]);
+    return smooth(pts);
+  }
+
+  const ellipse = (cx, cy, rx, ry, k = 10) =>
+    smooth(Array.from({ length: k }, (_, i) => [cx + rx * Math.cos(i / k * 6.2832), cy + ry * Math.sin(i / k * 6.2832)]));
+
+  // Local coordinates for a head: x forward, y down, turned by ang.
+  function frame(cx, cy, ang) {
+    const c = Math.cos(ang), s = Math.sin(ang);
+    return (x, y) => [cx + x * c - y * s, cy + x * s + y * c];
+  }
+
+  const HEADS = {
+    round: [[-1, .1], [-.8, -.7], [-.2, -1], [.45, -.85], [.95, -.25], [1, .3], [.6, .75], [-.2, .9], [-.8, .6]],
+    croc: [[-1, 0], [-.75, -1], [-.1, -.9], [.5, -.45], [1, -.2], [1.02, .35], [.5, .6], [-.3, .95], [-.85, .6]],
+    bill: [[-1, 0], [-.7, -1], [0, -.9], [.5, -.45], [.95, -.35], [1.05, .2], [.85, .6], [.3, .6], [-.4, .9], [-.9, .55]],
+    beak: [[-1, 0], [-.7, -1], [0, -.9], [.5, -.4], [1.05, .1], [.5, .5], [-.3, .9], [-.85, .6]],
+    ptero: [[-.6, 0], [-.45, -1], [0, -.8], [.6, -.2], [1.25, .35], [.5, .5], [-.2, .9], [-.55, .55]],
+  };
+  const head = (at, L, H, kind = 'round') => smooth(HEADS[kind].map(([x, y]) => at(x * L / 2, y * H / 2)));
+
+  function along(c, w, t) {
+    const seg = [];
+    let tot = 0;
+    for (let i = 1; i < c.length; i++) {
+      const l = Math.hypot(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]);
+      seg.push(l);
+      tot += l;
+    }
+    let dist = t * tot, i = 0;
+    while (i < seg.length - 1 && dist > seg[i]) { dist -= seg[i]; i++; }
+    const u = Math.min(1, dist / seg[i]), a = c[i], b = c[i + 1];
+    const x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, ww = w[i] + (w[i + 1] - w[i]) * u;
+    const tx = (b[0] - a[0]) / seg[i], ty = (b[1] - a[1]) / seg[i];
+    let nx = ty, ny = -tx;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    return { x, y, w: ww, tx, ty, nx, ny, top: [x + nx * ww / 2, y + ny * ww / 2] };
+  }
+
+  function seeded(str) {
+    let h = 2166136261;
+    for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      h = Math.imul(h ^ (h >>> 15), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return ((h ^= h >>> 16) >>> 0) / 4294967296;
+    };
+  }
+
+  // Leg makers.
+  function pillar(x, top, w = 20) {
+    return tube([[x, top], [x + 1, (top + GY) / 2], [x, GY - 7]], [w * 1.2, w * .95, w]);
+  }
+  function bigLeg(hx, hy, s = 1) {
+    const knee = [hx + 8 * s, hy + 24 * s], ankle = [hx - 2 * s, GY - 7];
+    return [
+      tube([[hx, hy - 4], knee], [40 * s, 24 * s]),
+      tube([knee, ankle], [18 * s, 12 * s]),
+      tube([[ankle[0] - 6 * s, GY - 5], [ankle[0] + 22 * s, GY - 4]], [11 * s, 9 * s]),
+    ];
+  }
+  function thinLeg(hx, hy, s = 1) {
+    const knee = [hx + 7 * s, hy + 20], ank = [hx - 1 * s, hy + 42];
+    return [
+      tube([[hx, hy - 2], knee], [26 * s, 16 * s]),
+      tube([knee, ank], [12 * s, 9 * s]),
+      tube([ank, [hx + 4 * s, GY - 5]], [9 * s, 8 * s]),
+      tube([[hx - 2 * s, GY - 4], [hx + 18 * s, GY - 3]], [8 * s, 7 * s]),
+    ];
+  }
+
+  const PLANS = {
+    sauro(A, f) {
+      const lift = f.front ? 16 : 0;
+      const c = [[6, 114], [34, 106], [62, 96], [90, 90], [116, 90 - lift * .5], [138, 92 - lift]];
+      const w = [3, 12, 28, 52, 54, 44];
+      let n;
+      if (f.neck === 'up') n = [[152, 78 - lift], [160, 54 - lift * .5], [166, 36], [170, 24]];
+      else if (f.neck === 'high') n = f.long ? [[154, 80], [170, 60], [184, 42], [196, 28]] : [[154, 80], [168, 64], [180, 50], [190, 38]];
+      else n = f.long ? [[156, 84], [178, 74], [198, 64], [214, 58]] : [[156, 84], [174, 74], [190, 64], [202, 58]];
+      const nw = [34, 22, 17, 15];
+      if (f.ridge) A.back(A.part(smooth([[64, 84], [80, 62], [104, 54], [128, 60], [146, 80], [104, 82]]), A.C.accent));
+      if (f.spines) {
+        for (const [row, col] of [[5, A.C.accentFar], [0, A.C.accent]]) {
+          for (let i = 0; i < 6; i++) {
+            const p = along(n, nw, .05 + i * .15);
+            const b = [p.x + p.nx * (p.w / 2 - 3) - p.tx * row, p.y + p.ny * (p.w / 2 - 3) - p.ty * row];
+            A.back(A.part(tube([b, [b[0] + p.nx * 18 - p.tx * 6, b[1] + p.ny * 18 - p.ty * 6]], [6, 1.2]), col, 2.5));
+          }
+        }
+      }
+      A.far(A.group([pillar(76, 98), pillar(130, 98 - lift)], A.C.far));
+      A.sil(tube([...c, ...n], [...w, ...nw]));
+      const h = n[n.length - 1];
+      const at = frame(h[0] + 9, h[1] + 1, f.neck === 'up' ? .12 : .2);
+      A.sil(head(at, 30, 18));
+      if (f.crest) A.sil(smooth([at(-10, -6), at(-6, -15), at(3, -15), at(6, -7)]));
+      A.near(A.group([pillar(92, 100, 21)], A.C.body));
+      A.near(A.group([pillar(146, 100 - lift, 20)], A.C.body));
+      A.toes(92, 21); A.toes(146, 20);
+      A.belly(ellipse(106, 109, 48, 13));
+      A.box([60, 62, 150, 102]);
+      A.face(at, { eye: [-1, -3, 4.5], smile: [3, 4, 13, 2] });
+      A.shadow(106, 84);
+    },
+
+    thero(A, f) {
+      const long = f.snout === 'long';
+      const c = [[4, 66], [36, 70], [66, 76], [94, 82], [120, 84], [140, 78], [152, 70]];
+      const w = [3, 14, 30, 46, 48, 34, 28];
+      const at = long ? frame(186, 66, .06) : frame(178, 60, .05);
+      if (f.sail) A.back(A.sail([[56, 74], [66, 34], [92, 16], [122, 28], [140, 68], [100, 76]], [[64, 72], [82, 22]], 6));
+      if (f.ridge) A.back(A.sail([[60, 72], [80, 54], [104, 47], [128, 56], [142, 70], [100, 74]], null));
+      if (f.crest2) {
+        A.back(A.part(smooth([at(-14, -12), at(-8, -34), at(8, -31), at(18, -14)]), A.C.accentFar));
+        A.back(A.part(smooth([at(-20, -12), at(-14, -32), at(2, -30), at(12, -12)]), A.C.accent));
+      }
+      if (f.feathers) A.back(A.fringe(c, w, .04, .95, 16, 9));
+      if (f.horns) A.back(A.part(tube([at(-6, -16), at(-11, -31)], [8, 1.5]), A.C.horn));
+      A.far(A.group(bigLeg(82, 88), A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, long ? 72 : 56, long ? 26 : 36, long ? 'croc' : 'round'));
+      if (f.nosecrest) A.back(A.part(smooth([at(-2, -15), at(6, -25), at(16, -19), at(18, -11)]), A.C.accent));
+      A.near(A.group(bigLeg(98, 90), A.C.body));
+      A.claws(118, GY - 4);
+      const arm = f.arms === 'small' ? [[134, 94], [144, 110], [152, 110]] : [[136, 96], [143, 106], [149, 104]];
+      A.near(A.group([tube(arm, f.arms === 'small' ? [11, 8, 7] : [9, 7, 6])], A.C.body));
+      if (f.horns) A.top(A.part(tube([at(-12, -15), at(-21, -29)], [9, 1.5]), A.C.horn));
+      if (f.nosehorn) A.top(A.part(smooth([at(8, -16), at(13, -28), at(20, -16)]), A.C.horn));
+      if (f.brow) A.top(A.part(smooth([at(-16, -15), at(-11, -23), at(-4, -17)]), A.C.accent, 2.5));
+      A.belly(smooth([[60, 96], [100, 104], [138, 96], [128, 108], [96, 112], [64, 106]]));
+      A.box([40, 56, 140, 92]);
+      if (long) A.face(at, { eye: [-18, -5, 5], smile: [-12, 6, 34, 5, 3], teeth: [-2, 6, 12, 18, 24, 30], nostril: [30, -2] });
+      else A.face(at, { eye: [-10, -6, 6], smile: [-4, 8, 25, 4, 6], teeth: [2, 8, 14, 20], nostril: [21, -7] });
+      A.shadow(104, 86);
+    },
+
+    raptor(A, f) {
+      const long = f.neck === 'long', dy = long ? -8 : 0;
+      const c = [[4, 62 + dy], [30, 66 + dy], [60, 74 + dy], [88, 84 + dy], [110, 86 + dy]];
+      const w = [3, 8, 16, 34, 32];
+      const n = long ? [[124, 76 + dy], [132, 58 + dy], [138, 40 + dy], [144, 28 + dy]] : [[126, 78], [134, 64], [140, 56]];
+      const nw = long ? [18, 13, 11, 10] : [18, 14, 13];
+      const h = n[n.length - 1];
+      const at = long ? frame(h[0] + 10, h[1], .12) : frame(h[0] + 14, h[1] - 4, .1);
+      const hl = long ? 28 : 38, hh = long ? 16 : 22;
+      const feathered = f.feathers === 'arms' || f.feathers === 'full';
+      if (f.feathers === 'full') {
+        A.back(A.part(smooth([[0, 54 + dy], [6, 42 + dy], [22, 52 + dy], [26, 70 + dy], [6, 74 + dy]]), A.C.accent));
+        A.back(A.part(smooth([at(-hl * .3, -hh * .3), at(-hl * .8, -hh * 1.1), at(-hl * .45, -hh * .55), at(-hl * .7, -hh * 1.3), at(-hl * .1, -hh * .5)]), A.C.accent, 2.5));
+      }
+      if (f.crest) A.back(A.part(smooth([at(-4, -8), at(-2, -28), at(10, -24), at(12, -8)]), A.C.accent));
+      A.far(A.group(thinLeg(80, 88 + dy), A.C.far));
+      A.sil(tube([...c, ...n], [...w, ...nw]));
+      A.sil(head(at, hl, hh, f.beak ? 'beak' : 'round'));
+      const hx = 92, hy = 90 + dy;
+      if (f.legwings) A.near(A.part(smooth([[hx + 4, hy + 16], [hx - 18, hy + 38], [hx - 10, hy + 50], [hx + 6, hy + 34]]), A.C.accent));
+      A.near(A.group(thinLeg(hx, hy), A.C.body));
+      A.claws(hx + 18, GY - 3, .8);
+      if (f.sickle) A.top(A.part(tube([[hx + 3, GY - 7], [hx + 8, GY - 16], [hx + 13, GY - 13]], [5, 3, 1.4]), A.C.horn, 2));
+      if (feathered) A.near(A.part(smooth([[114, 88 + dy], [118, 112 + dy], [128, 122 + dy], [142, 112 + dy], [138, 104 + dy], [124, 96 + dy]]), A.C.accent));
+      A.near(A.group([tube([[118, 92 + dy], [128, 104 + dy], [136, 104 + dy]], [8, 6, 5])], A.C.body));
+      A.belly(ellipse(96, 94 + dy, 22, 9));
+      A.box([40, 66 + dy, 118, 96 + dy]);
+      const l = hl / 2, hhh = hh / 2;
+      if (f.beak) A.top(A.part(smooth([at(.35 * l, -.55 * hhh), at(.75 * l, -.2 * hhh), at(1.05 * l, .1 * hhh), at(.6 * l, .45 * hhh), at(.3 * l, .4 * hhh)]), A.C.beak, 2.5));
+      if (f.buck) A.top(A.part(smooth([at(.8 * l, .35 * hhh), at(.95 * l, .3 * hhh), at(.95 * l, .95 * hhh), at(.78 * l, .95 * hhh)]), '#ffffff', 2));
+      A.face(at, {
+        eye: [long ? -2 : -4, long ? -2 : -3, f.bigeye ? 7 : long ? 4.5 : 5.5],
+        smile: f.beak ? [-l * .2, hhh * .4, l * .3, hhh * .35, 2] : [0, 4, 16, 3, 3],
+        teeth: f.beak ? null : [8, 13],
+      });
+      A.shadow(92, 66);
+    },
+
+    therizino(A, f) {
+      const c = [[14, 120], [40, 112], [72, 100], [96, 84], [112, 64], [124, 46], [136, 32]];
+      const w = [4, 18, 46, 54, 40, 22, 15];
+      const at = frame(150, 28, .15);
+      if (f.fuzzy) A.back(A.fringe(c, w, .05, .9, 14, 8));
+      A.far(A.group(thinLeg(66, 106, 1.25), A.C.far));
+      A.far(A.group([tube([[106, 68], [118, 90], [130, 102]], [13, 9, 7])], A.C.far));
+      A.far(A.claw3([130, 102], f.claws === 'huge' ? 1.2 : .8, A.C.horn));
+      A.sil(tube(c, w));
+      A.sil(head(at, 26, 16, 'beak'));
+      A.near(A.group(thinLeg(80, 108, 1.25), A.C.body));
+      A.claws(102, GY - 3);
+      A.near(A.group([tube([[114, 70], [128, 90], [140, 102]], [14, 10, 8])], A.C.body));
+      A.near(A.claw3([140, 102], f.claws === 'huge' ? 1.35 : .9, A.C.horn));
+      A.belly(ellipse(90, 100, 26, 22));
+      A.box([56, 56, 122, 100]);
+      A.top(A.part(smooth([at(4, -5), at(10, -2), at(14, 1), at(8, 4), at(3, 3)]), A.C.beak, 2.2));
+      A.face(at, { eye: [-3, -3, 4.5], smile: [-4, 3, 4, 3, 1.5] });
+      A.shadow(92, 64);
+    },
+
+    cerato(A, f) {
+      const c = [[8, 106], [36, 100], [66, 92], [98, 88], [124, 92], [142, 100]];
+      const w = [4, 22, 48, 60, 54, 40];
+      const at = frame(168, 102, .22);
+      const fs = { big: [36, 32], med: [28, 26], small: [18, 16] }[f.frill || 'med'];
+      const fc = at(-22, -18), rot = -.55;
+      const fr = frame(fc[0], fc[1], rot);
+      const edge = th => fr(fs[0] * Math.cos(th), fs[1] * Math.sin(th));
+      A.back(A.part(smooth(Array.from({ length: 12 }, (_, i) => edge(i / 12 * 6.2832))), A.C.accent));
+      A.back(`<path d="${smooth(Array.from({ length: 10 }, (_, i) => fr(fs[0] * .62 * Math.cos(i / 10 * 6.2832), fs[1] * .62 * Math.sin(i / 10 * 6.2832))))}" fill="${A.C.belly}" opacity=".75"/>`);
+      const nsp = +f.spikes || 0;
+      if (nsp) {
+        for (let i = 0; i < nsp; i++) {
+          const th = -2.5 + (nsp === 1 ? 1 : i / (nsp - 1)) * 2.2;
+          const b = edge(th), o = fr((fs[0] + 22) * Math.cos(th), (fs[1] + 22) * Math.sin(th));
+          A.back(A.part(tube([b, o], [9, 1.5]), A.C.horn, 2.5));
+        }
+      } else if (f.hooks) {
+        for (let i = 0; i < 5; i++) {
+          const th = -2.4 + i * .5, b = edge(th), o = fr((fs[0] + 9) * Math.cos(th), (fs[1] + 9) * Math.sin(th));
+          A.back(A.part(tube([b, o, [o[0] + 6, o[1] + 4]], [6, 4, 1.4]), A.C.horn, 2));
+        }
+      } else {
+        for (let i = 0; i < 6; i++) {
+          const th = -2.6 + i * .42, b = edge(th), o = fr((fs[0] + 6) * Math.cos(th), (fs[1] + 6) * Math.sin(th));
+          A.back(A.part(tube([b, o], [7, 1.5]), A.C.accentFar, 2));
+        }
+      }
+      if (f.brow === 'long') A.back(A.part(tube([at(-1, -15), at(26, -38)], [9, 1.5]), A.C.hornFar));
+      A.far(A.group([pillar(70, 98, 20), pillar(124, 100, 19)], A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, 54, 34));
+      A.near(A.group([pillar(86, 100, 22)], A.C.body));
+      A.near(A.group([pillar(140, 104, 20)], A.C.body));
+      A.toes(86, 22); A.toes(140, 20);
+      A.top(A.part(smooth([at(19, -8), at(29, -2), at(29, 9), at(20, 10)]), A.C.hornBeak, 2.5));
+      if (f.brow === 'long') A.top(A.part(tube([at(-7, -14), at(16, -42)], [10, 1.5]), A.C.horn));
+      if (f.brow === 'short') A.top(A.part(tube([at(-7, -14), at(0, -26)], [9, 1.5]), A.C.horn));
+      if (f.nose === 'short') A.top(A.part(tube([at(15, -12), at(19, -23)], [8, 1.5]), A.C.horn));
+      if (f.nose === 'long') A.top(A.part(tube([at(14, -12), at(20, -38)], [11, 1.5]), A.C.horn));
+      if (f.nose === 'curve') A.top(A.part(tube([at(14, -12), at(24, -26), at(35, -22)], [10, 6, 1.5]), A.C.horn));
+      if (f.nose === 'boss') A.top(A.part(smooth([at(4, -13), at(8, -20), at(18, -21), at(22, -13)]), A.C.horn));
+      A.belly(ellipse(98, 112, 44, 12));
+      A.box([44, 64, 134, 100]);
+      A.face(at, { eye: [-8, -6, 5.5], smile: [0, 7, 16, 6, 3], cheek: [-1, 4] });
+      A.shadow(102, 86);
+    },
+
+    stego(A, f) {
+      const c = [[6, 92], [34, 90], [62, 84], [94, 80], [122, 90], [144, 106], [158, 114]];
+      const w = [4, 16, 44, 60, 48, 26, 18];
+      const at = frame(172, 118, .3);
+      const kind = f.plates || 'big';
+      const plate = (t, s, col) => {
+        const p = along(c, w, t);
+        const b = [p.top[0] - p.nx * 4, p.top[1] - p.ny * 4];
+        const P = (u, v) => [b[0] + p.tx * u + p.nx * v, b[1] + p.ty * u + p.ny * v];
+        if (kind === 'spiky' && t < .48) return A.part(tube([P(0, 0), P(-s * .2, s * 1.4)], [s * .45, 1.4]), A.C.horn, 2.5);
+        if (kind === 'low') return A.part(smooth([P(-s * .75, 0), P(-s * .62, s * .62), P(0, s * .78), P(s * .62, s * .62), P(s * .75, 0)]), col);
+        const k = kind === 'small' || kind === 'spiky' ? .62 : 1;
+        return A.part(smooth([P(-s * .42 * k, 0), P(-s * .55 * k, s * .6 * k), P(-s * .12, s * 1.28 * k), P(s * .08, s * 1.3 * k), P(s * .5 * k, s * .62 * k), P(s * .42 * k, 0)]), col);
+      };
+      const bell = t => .55 + .45 * Math.sin(Math.min(1, Math.max(0, (t - .08) / .72)) * Math.PI);
+      for (let i = 0; i < 7; i++) { const t = .15 + i * .1; A.back(plate(t, 22 * bell(t), A.C.accentFar)); }
+      for (let i = 0; i < 7; i++) { const t = .1 + i * .1; A.back(plate(t, 22 * bell(t), A.C.accent)); }
+      for (const t of [.035, .09]) {
+        const p = along(c, w, t), b = p.top;
+        A.back(A.part(tube([[b[0] + 3, b[1] + 3], [b[0] - 2, b[1] - 21]], [7, 1.4]), A.C.hornFar, 2.5));
+      }
+      A.far(A.group([pillar(74, 94, 21), pillar(130, 104, 18)], A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, 30, 18));
+      A.near(A.group([pillar(90, 96, 23)], A.C.body));
+      A.near(A.group([pillar(146, 108, 19)], A.C.body));
+      A.toes(90, 23); A.toes(146, 19);
+      for (const t of [.05, .11]) {
+        const p = along(c, w, t), b = p.top;
+        A.top(A.part(tube([[b[0] + 2, b[1] + 4], [b[0] - 6, b[1] - 20]], [7, 1.4]), A.C.horn, 2.5));
+      }
+      if (f.shoulder) {
+        const big = f.shoulder === 'big';
+        A.top(A.part(tube([[136, 102], [122, big ? 84 : 92], [big ? 100 : 114, big ? 76 : 86]], [big ? 13 : 10, big ? 8 : 6, 1.5]), A.C.horn));
+      }
+      A.belly(ellipse(98, 104, 42, 12));
+      A.box([50, 56, 132, 96]);
+      A.face(at, { eye: [-2, -2, 4.5], smile: [2, 4, 11, 3] });
+      A.shadow(100, 86);
+    },
+
+    ankylo(A, f) {
+      const c = [[12, 118], [38, 116], [66, 108], [98, 104], [130, 106], [150, 112]];
+      const w = [8, 14, 40, 54, 48, 32];
+      const at = frame(170, 116, .08);
+      A.far(A.group([pillar(74, 112, 20), pillar(126, 112, 19)], A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, 34, 24));
+      A.near(A.group([pillar(90, 114, 22)], A.C.body));
+      A.near(A.group([pillar(142, 116, 20)], A.C.body));
+      A.toes(90, 22); A.toes(142, 20);
+      A.belly(ellipse(98, 124, 46, 8));
+      // Armour: rows of little bony bumps across the back.
+      let s = '';
+      for (let row = 0; row < 3; row++) {
+        for (let x = 52 + (row % 2) * 7; x <= 142; x += 14) {
+          const p = along(c, w, (x - 12) / 140);
+          const y = p.top[1] + 7 + row * 9;
+          if (y > p.y + p.w / 2 - 12) continue;
+          s += `<ellipse cx="${r1(x)}" cy="${r1(y)}" rx="4.6" ry="3.4" fill="${A.C.accent}" stroke="${A.C.ol}" stroke-width="1.8"/>`;
+        }
+      }
+      A.top(s);
+      if (f.spikes === 'side') {
+        for (let x = 56; x <= 140; x += 14) {
+          const p = along(c, w, (x - 12) / 140), b = p.top;
+          A.top(A.part(smooth([[b[0] - 4, b[1] + 3], [b[0] - 2, b[1] - 9], [b[0] + 4, b[1] + 3]]), A.C.horn, 2));
+        }
+      }
+      if (f.spikes === 'shoulder') {
+        A.top(A.part(tube([[126, 96], [140, 76]], [10, 1.5]), A.C.horn));
+        A.top(A.part(tube([[136, 100], [154, 86]], [10, 1.5]), A.C.horn));
+      }
+      if (f.club) A.top(A.part(smooth(Array.from({ length: 10 }, (_, i) => {
+        const a = i / 10 * 6.2832, r = i % 2 ? 1 : 1.18;
+        return [12 + 12 * r * Math.cos(a), 118 + 9 * r * Math.sin(a)];
+      })), A.C.accent));
+      A.top(A.part(smooth([at(-12, -9), at(-22, -15), at(-7, -12)]), A.C.horn, 2));
+      A.top(A.part(smooth([at(-13, 5), at(-22, 11), at(-9, 9)]), A.C.horn, 2));
+      A.face(at, { eye: [-2, -3, 5], smile: [4, 5, 14, 4], cheek: [2, 4] });
+      A.shadow(98, 88);
+    },
+
+    hadro(A, f) {
+      const c = [[4, 80], [34, 82], [66, 86], [94, 88], [120, 92], [138, 84], [148, 68]];
+      const w = [3, 16, 38, 52, 46, 30, 22];
+      const at = frame(170, 58, .12);
+      const cr = f.crest;
+      if (f.sail) A.back(A.sail([[52, 82], [62, 52], [90, 40], [118, 50], [132, 80], [94, 86]], [[60, 80], [80, 44]], 5));
+      if (cr === 'tube') A.back(A.part(tube([at(-6, -7), at(-24, -21), at(-46, -29)], [12, 11, 10]), A.C.accent));
+      if (cr === 'helmet') A.back(A.part(smooth([at(-17, -5), at(-14, -25), at(4, -29), at(13, -10)]), A.C.accent));
+      if (cr === 'small') A.back(A.part(smooth([at(-12, -7), at(-8, -18), at(4, -19), at(8, -8)]), A.C.accent));
+      if (cr === 'fan') A.back(A.part(smooth([at(-14, -6), at(-34, -24), at(-14, -38), at(6, -26), at(8, -8)]), A.C.accent));
+      if (cr === 'hatchet') {
+        A.back(A.part(tube([at(-12, -10), at(-28, -16)], [8, 2]), A.C.accentFar));
+        A.back(A.part(smooth([at(-6, -8), at(-3, -28), at(14, -31), at(11, -11)]), A.C.accent));
+      }
+      if (cr === 'spike') A.back(A.part(tube([at(-4, -9), at(-28, -22)], [11, 2]), A.C.accent));
+      if (cr === 'unicorn') A.back(A.part(tube([at(-2, -9), at(6, -36)], [9, 5]), A.C.accent));
+      if (cr === 'flat') A.back(A.part(smooth([at(-8, -9), at(-28, -14), at(-26, -6), at(-10, -3)]), A.C.accent));
+      A.far(A.group(bigLeg(82, 92), A.C.far));
+      A.far(A.group([tube([[124, 98], [130, 124], [128, 150]], [12, 9, 8]), tube([[124, 152], [138, 152]], [7, 6])], A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, 48, 24, f.nobill ? 'round' : 'bill'));
+      if (cr === 'nose') A.sil(smooth([at(2, -9), at(10, -17), at(20, -11), at(22, -5)]));
+      if (cr === 'bump') A.sil(smooth([at(-6, -10), at(0, -15), at(7, -10)]));
+      A.near(A.group(bigLeg(98, 94), A.C.body));
+      A.claws(118, GY - 4);
+      A.near(A.group([tube([[132, 100], [138, 126], [136, 150]], [12, 9, 8]), tube([[132, 152], [146, 152]], [7, 6])], A.C.body));
+      if (f.thumb) A.top(A.part(tube([[142, 146], [151, 132]], [6, 1.4]), A.C.horn, 2.5));
+      A.belly(ellipse(98, 104, 40, 14));
+      A.box([46, 64, 132, 98]);
+      A.face(at, { eye: [-8, -4, 5], smile: f.nobill ? [2, 5, 18, 4] : [4, 6, 22, 4, 3], cheek: [-2, 4] });
+      A.shadow(104, 80);
+    },
+
+    small(A, f) {
+      const lt = f.longtail;
+      const c = lt ? [[-6, 50], [14, 60], [38, 72], [64, 84], [92, 92], [112, 92]] : [[4, 70], [34, 76], [64, 84], [92, 92], [112, 92]];
+      const w = lt ? [2, 5, 10, 24, 40, 36] : [3, 10, 24, 40, 36];
+      const n = [[128, 82], [136, 68]], nw = [22, 18];
+      const at = frame(154, 60, .08);
+      if (f.frill) A.back(A.part(smooth([at(-14, -6), at(-26, -16), at(-22, 2)]), A.C.accent));
+      if (f.dome === 'spiky') {
+        for (const [a, b] of [[[-13, -12], [-28, -24]], [[-16, -3], [-32, -8]], [[-8, -17], [-14, -32]], [[-14, 5], [-28, 10]]]) {
+          A.back(A.part(tube([at(...a), at(...b)], [6, 1.4]), A.C.horn, 2.2));
+        }
+      }
+      A.far(A.group(thinLeg(82, 96), A.C.far));
+      A.sil(tube([...c, ...n], [...w, ...nw]));
+      A.sil(head(at, 38, 30, f.beak ? 'beak' : 'round'));
+      A.near(A.group(thinLeg(94, 98), A.C.body));
+      A.claws(112, GY - 3, .8);
+      A.near(A.group([tube([[122, 98], [130, 108], [136, 107]], [8, 6, 5])], A.C.body));
+      if (f.bristles) {
+        let s = '';
+        for (let i = 0; i < 6; i++) {
+          const p = along(c, w, .05 + i * .08), b = p.top;
+          s += `<path d="M${r1(b[0])} ${r1(b[1])} l${r1(p.nx * 12 - p.tx * 3)} ${r1(p.ny * 12 - p.ty * 3)}" stroke="${A.C.ol}" stroke-width="2.2" stroke-linecap="round"/>`;
+        }
+        A.back(s);
+      }
+      if (f.dome === 'round' || f.dome === 'spiky') {
+        const k = f.dome === 'round' ? 1 : .75;
+        A.top(A.part(smooth([at(-14 * k, -7), at(-12 * k, -7 - 16 * k), at(0, -9 - 20 * k), at(12 * k, -7 - 14 * k), at(14 * k, -8)]), A.C.dome));
+        let s = '';
+        for (const [x, y] of [[-15, -4], [-17, 2], [-12, -10]]) s += `<circle cx="${r1(at(x, y)[0])}" cy="${r1(at(x, y)[1])}" r="2.6" fill="${A.C.horn}" stroke="${A.C.ol}" stroke-width="1.6"/>`;
+        A.top(s);
+      }
+      if (f.dome === 'flat') A.top(A.part(smooth([at(-15, -8), at(-12, -17), at(10, -17), at(14, -9)]), A.C.dome));
+      if (f.beak) A.top(A.part(smooth([at(6, -9), at(16, -4), at(20, 2), at(14, 7), at(6, 6)]), A.C.hornBeak, 2.4));
+      if (f.cheek) A.top(A.part(smooth([at(-4, 6), at(-10, 17), at(2, 10)]), A.C.horn, 2));
+      A.belly(ellipse(98, 104, 26, 12));
+      A.box([50, 76, 118, 98]);
+      A.face(at, { eye: [-4, -4, f.bigeye ? 7.5 : 6], smile: [2, 7, 14, 5, 3], cheek: [-2, 6] });
+      A.shadow(96, 62);
+    },
+
+    ptero(A, f) {
+      const longN = f.neck === 'long';
+      const c = [[86, 98], [104, 94], [122, 88], [134, 80], ...(longN ? [[140, 64], [148, 46]] : [[140, 74], [146, 68]])];
+      const w = [10, 22, 24, 17, ...(longN ? [11, 10] : [12, 12])];
+      const h = c[c.length - 1];
+      const big = f.head === 'big', wide = f.head === 'wide';
+      const at = big ? frame(h[0] + 14, h[1] - 2, .1) : wide ? frame(h[0] + 12, h[1], .1) : frame(h[0] + 18, h[1], .14);
+      const cr = f.crest;
+      if (cr === 'back') A.back(A.part(smooth([at(-6, -6), at(-40, -21), at(-44, -15), at(-14, 0)]), A.C.accent));
+      if (cr === 'sail') A.back(A.part(smooth([at(-4, -6), at(-10, -38), at(10, -30), at(20, -6)]), A.C.accent));
+      if (cr === 'small') A.back(A.part(smooth([at(-6, -6), at(-2, -16), at(8, -14), at(10, -6)]), A.C.accent));
+      if (cr === 'antler') {
+        A.back(A.part(tube([at(-4, -6), at(-14, -32), at(-24, -58)], [6, 4, 2.5]), A.C.accent, 2.5));
+        A.back(A.part(tube([at(-12, -28), at(-36, -40)], [4, 2]), A.C.accent, 2.5));
+      }
+      A.far(A.part(smooth([[118, 86], [98, 52], [70, 18], [60, 14], [78, 44], [94, 78], [104, 96]]), A.C.wingFar));
+      A.far(A.group([tube([[118, 86], [96, 52], [64, 15]], [7, 5, 3])], A.C.far));
+      if (f.tail === 'long') {
+        A.back(A.part(smooth([[34, 108], [22, 97], [10, 108], [22, 119]]), A.C.accent));
+        A.sil(tube([[90, 98], [60, 104], [34, 108]], [6, 3, 2]));
+      }
+      if (f.fuzzy) A.back(A.fringe(c.slice(0, 4), w.slice(0, 4), .05, .95, 8, 6));
+      A.sil(tube(c, w));
+      A.sil(head(at, big ? 34 : wide ? 28 : 44, big ? 26 : wide ? 20 : 18, big || wide ? 'round' : 'ptero'));
+      A.near(A.group([tube([[92, 100], [88, 114], [80, 120]], [7, 5, 4])], A.C.body));
+      A.near(A.part(smooth([[118, 90], [80, 70], [30, 52], [14, 50], [40, 74], [78, 100], [108, 104]]), A.C.wing));
+      A.near(A.group([tube([[118, 90], [78, 68], [38, 54], [14, 50]], [8, 6, 4, 2])], A.C.body));
+      A.top(A.part(smooth([[80, 66], [76, 58], [84, 64]]), A.C.horn, 1.8));
+      A.belly(ellipse(112, 96, 18, 6));
+      const l = (big ? 34 : wide ? 28 : 44) / 2;
+      A.face(at, {
+        eye: big ? [-4, -6, 6] : wide ? [-2, -3, 5.5] : [-8, -3, 5],
+        smile: big || wide ? [0, 5, 14, 5, 2] : [-2, 5, l * 1.1, 6, 2],
+        teeth: f.teeth ? (big || wide ? [6, 11] : [6, 12, 18]) : null,
+      });
+      return 'sky';
+    },
+
+    marine(A, f) {
+      const k = f.kind;
+      const fl = (pts, far) => far ? A.far(A.part(smooth(pts), A.C.far)) : A.near(A.part(smooth(pts), A.C.body));
+      if (k === 'plesio') {
+        const vl = f.neck === 'vlong';
+        const c = [[36, 120], [60, 116], [92, 112], [122, 106], [140, 98], ...(vl ? [[150, 86], [164, 62], [176, 42], [190, 28]] : [[154, 88], [168, 74], [180, 62]])];
+        const w = [3, 18, 40, 38, 24, ...(vl ? [16, 12, 11, 10] : [16, 12, 11])];
+        const h = c[c.length - 1], at = frame(h[0] + 12, h[1] + 1, .12);
+        fl([[118, 104], [138, 118], [152, 134], [144, 138], [124, 124], [112, 112]], true);
+        fl([[70, 112], [78, 130], [88, 144], [80, 146], [66, 130], [62, 116]], true);
+        A.sil(tube(c, w));
+        A.sil(head(at, 26, 14, 'croc'));
+        fl([[112, 112], [126, 134], [136, 150], [126, 152], [108, 134], [100, 118]]);
+        fl([[60, 118], [60, 138], [68, 152], [58, 152], [48, 136], [50, 120]]);
+        A.belly(smooth([[56, 124], [96, 124], [132, 112], [120, 128], [80, 132]]));
+        A.box([60, 92, 130, 112]);
+        A.face(at, { eye: [-4, -2, 4], smile: [-2, 3, 12, 3, 1.5], teeth: [4, 8] });
+      } else if (k === 'pliosaur') {
+        const c = [[26, 114], [52, 110], [88, 106], [120, 102], [142, 96]];
+        const w = [3, 18, 44, 46, 36];
+        const at = frame(172, 92, .03);
+        fl([[116, 104], [140, 120], [158, 136], [148, 140], [124, 126], [108, 112]], true);
+        fl([[62, 110], [70, 130], [82, 146], [72, 148], [56, 130], [52, 114]], true);
+        A.sil(tube(c, w));
+        A.sil(head(at, 66, 30, 'croc'));
+        fl([[106, 112], [122, 136], [134, 154], [122, 156], [100, 134], [94, 118]]);
+        fl([[54, 118], [54, 140], [62, 156], [50, 156], [42, 138], [44, 120]]);
+        A.belly(smooth([[48, 120], [90, 126], [140, 108], [150, 104], [128, 124], [86, 134], [50, 128]]));
+        A.box([50, 84, 136, 108]);
+        A.face(at, { eye: [-16, -6, 5.5], smile: [-20, 6, 31, 4, 3], teeth: [-12, -5, 2, 9, 16, 23, 29] });
+      } else if (k === 'mosa') {
+        const c = [[16, 110], [38, 104], [68, 98], [102, 96], [134, 94], [152, 90]];
+        const w = [3, 14, 30, 40, 36, 28];
+        const at = frame(178, 86, .02);
+        fl([[120, 104], [130, 122], [142, 126], [134, 110]], true);
+        fl([[70, 104], [74, 122], [86, 126], [82, 108]], true);
+        A.sil(tube(c, w));
+        A.sil(smooth([[26, 106], [6, 88], [0, 92], [8, 110], [2, 126], [8, 129], [28, 112]]));
+        A.sil(head(at, 56, 26, 'croc'));
+        fl([[112, 108], [118, 130], [132, 136], [126, 112]]);
+        fl([[62, 106], [62, 128], [74, 134], [74, 110]]);
+        A.belly(smooth([[30, 112], [70, 112], [120, 108], [152, 98], [134, 112], [90, 120], [44, 118]]));
+        A.box([40, 80, 150, 102]);
+        A.face(at, { eye: [-12, -5, 5], smile: [-16, 5, 27, 4, 3], teeth: [-8, -1, 6, 13, 20] });
+      } else {
+        const c = [[44, 100], [70, 96], [104, 94], [134, 94], [154, 96]];
+        const w = [8, 30, 44, 36, 22];
+        const at = frame(150, 94, 0);
+        fl([[112, 106], [104, 126], [114, 128], [122, 110]], true);
+        A.sil(tube(c, w));
+        A.sil(tube([[150, 96], [176, 98], [206, 101]], [18, 8, 3]));
+        A.sil(smooth([[88, 80], [102, 56], [118, 76]]));
+        A.sil(tube([[50, 98], [36, 82], [26, 70]], [12, 7, 2]));
+        A.sil(tube([[50, 100], [36, 116], [28, 128]], [12, 7, 2]));
+        fl([[124, 108], [118, 132], [132, 128], [134, 110]]);
+        A.belly(smooth([[60, 104], [100, 112], [150, 102], [130, 116], [90, 118], [64, 112]]));
+        A.box([60, 74, 140, 98]);
+        A.face(at, { eye: [0, -5, 7], smile: [14, 3, 40, 5, 2] });
+      }
+      return 'sea';
+    },
+
+    dimetro(A) {
+      const c = [[6, 122], [34, 120], [64, 114], [96, 110], [126, 110], [144, 108]];
+      const w = [3, 12, 30, 38, 34, 26];
+      const at = frame(166, 104, .05);
+      A.back(A.sail([[52, 106], [58, 62], [78, 34], [104, 34], [124, 58], [134, 104]], [[60, 104], [90, 32]], 7));
+      A.far(A.group([tube([[84, 116], [74, 132], [80, 148]], [15, 10, 9]), tube([[116, 116], [126, 132], [124, 148]], [13, 9, 8])], A.C.far));
+      A.sil(tube(c, w));
+      A.sil(head(at, 44, 28));
+      A.near(A.group([tube([[72, 118], [60, 134], [66, 150]], [16, 11, 10]), tube([[60, 152], [76, 152]], [8, 7])], A.C.body));
+      A.near(A.group([tube([[128, 118], [140, 134], [136, 150]], [14, 10, 9]), tube([[130, 152], [146, 152]], [8, 7])], A.C.body));
+      A.belly(ellipse(98, 122, 40, 8));
+      A.box([48, 96, 136, 116]);
+      A.face(at, { eye: [-8, -6, 5], smile: [-4, 7, 18, 5, 4], teeth: [2, 8, 13] });
+      A.shadow(96, 84);
+    },
+  };
+
+  const HUES = {
+    green: ['#7fcf6c', '#eaf7cf', '#4c9c42'],
+    teal: ['#52c3b2', '#dcf5ee', '#2c8f84'],
+    blue: ['#6ea9ee', '#e0edff', '#3b74c6'],
+    purple: ['#a78ce6', '#eee7ff', '#7056c4'],
+    pink: ['#f594b8', '#ffe6f0', '#d65f8d'],
+    orange: ['#f6a64f', '#ffeed6', '#d4742a'],
+    yellow: ['#f1cd52', '#fff7d6', '#c4961e'],
+    red: ['#ee7563', '#ffe4dc', '#c6493a'],
+    brown: ['#c79c6e', '#f7e9d6', '#97693f'],
+    lime: ['#b4d64e', '#f4fad8', '#7f9f22'],
+  };
+
+  function colorsFor(d) {
+    const [body, belly, accent] = HUES[d.color];
+    return {
+      body, belly, accent,
+      far: mix(body, INK, .2),
+      accentFar: mix(accent, INK, .18),
+      ol: mix(body, INK, .66),
+      horn: '#fff3d8',
+      hornFar: '#ead9b8',
+      hornBeak: mix(body, INK, .4),
+      beak: '#f3b746',
+      dome: mix(accent, '#fff3d8', .35),
+      wing: mix(accent, '#ffffff', .25),
+      wingFar: mix(accent, INK, .12),
+    };
+  }
+
+  function sceneSVG(scene, shadow) {
+    if (scene === 'sky') {
+      const cloud = (x, y, s) => `<path d="${smooth([[x - 22 * s, y + 6 * s], [x - 16 * s, y - 6 * s], [x - 4 * s, y - 10 * s], [x + 10 * s, y - 8 * s], [x + 22 * s, y + 4 * s], [x, y + 9 * s]])}" fill="#ffffff" opacity=".9"/>`;
+      return cloud(196, 28, 1.1) + cloud(44, 140, .9);
+    }
+    if (scene === 'sea') {
+      let s = `<path d="M0 14 Q15 6 30 14 T60 14 T90 14 T120 14 T150 14 T180 14 T210 14 T240 14" fill="none" stroke="#ffffff" stroke-width="3" opacity=".6"/>`;
+      s += `<path d="${smooth([[-10, 176], [40, 158], [120, 160], [200, 156], [250, 176]])}" fill="#f2e2b4"/>`;
+      s += `<path d="M214 160 q-10 -18 2 -34 q10 -14 -2 -30" fill="none" stroke="#5fb87a" stroke-width="5" stroke-linecap="round"/>`;
+      for (const [x, y, r] of [[200, 60, 4], [208, 44, 2.6], [30, 40, 3.2], [22, 56, 2]]) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#ffffff" stroke-width="1.8" opacity=".8"/>`;
+      return s;
+    }
+    const tuft = (x, y) => `<path d="M${x - 6} ${y} q2 -9 4 -12 M${x} ${y} q0 -10 1 -15 M${x + 6} ${y} q-2 -9 -4 -12" fill="none" stroke="#7cbf58" stroke-width="2.6" stroke-linecap="round"/>`;
+    return `<ellipse cx="120" cy="164" rx="128" ry="16" fill="#d8eeb2"/>`
+      + tuft(22, 154) + tuft(220, 152)
+      + `<ellipse cx="${shadow[0]}" cy="${GY + 1}" rx="${shadow[1]}" ry="6" fill="rgba(45,36,64,.13)"/>`;
+  }
+
+  function drawDino(d, uid) {
+    const C = colorsFor(d);
+    const far = [], back = [], sil = [], near = [], top = [];
+    let box = null, bellyD = null, shadow = [104, 80];
+    const part = (p, fill, sw = 3.5) => `<path d="${p}" fill="${fill}" stroke="${C.ol}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const group = (paths, fill) => `<g>${paths.map(p => `<path d="${p}" fill="${C.ol}" stroke="${C.ol}" stroke-width="7" stroke-linejoin="round"/>`).join('')}${paths.map(p => `<path d="${p}" fill="${fill}"/>`).join('')}</g>`;
+    const A = {
+      C, part, group,
+      far: s => far.push(s), back: s => back.push(s), sil: p => sil.push(p), near: s => near.push(s), top: s => top.push(s),
+      box: b => { box = b; }, belly: p => { bellyD = p; }, shadow: (x, rx) => { shadow = [x, rx]; },
+      sail(pts, ray, n) {
+        let s = part(smooth(pts), C.accent);
+        if (ray) {
+          for (let i = 0; i < n; i++) {
+            const x0 = ray[0][0] + i * ((pts[pts.length - 2][0] - ray[0][0]) / n);
+            s += `<path d="M${r1(x0 + 6)} ${r1(ray[0][1] - 2)} L${r1(x0 + 6 + (i - n / 2) * 2)} ${r1(ray[1][1] + 14 + Math.abs(i - n / 2) * 7)}" stroke="${C.ol}" stroke-width="2" stroke-linecap="round" opacity=".35"/>`;
+          }
+        }
+        return s;
+      },
+      fringe(c, w, t0, t1, n, len) {
+        let s = '';
+        for (let i = 0; i < n; i++) {
+          const p = along(c, w, t0 + (t1 - t0) * i / (n - 1)), b = p.top, L = len * (i % 2 ? .75 : 1);
+          s += part(smooth([[b[0] - p.tx * 4 - p.nx * 3, b[1] - p.ty * 4 - p.ny * 3], [b[0] + p.nx * L - p.tx * 5, b[1] + p.ny * L - p.ty * 5], [b[0] + p.tx * 4 - p.nx * 3, b[1] + p.ty * 4 - p.ny * 3]]), C.accent, 2.5);
+        }
+        return s;
+      },
+      claws(x, y, s = 1) {
+        top.push(`<ellipse cx="${r1(x + 1)}" cy="${r1(y)}" rx="${3.4 * s}" ry="${2.4 * s}" fill="${C.horn}" stroke="${C.ol}" stroke-width="1.6"/>`);
+      },
+      claw3(base, s, col) {
+        let out = '';
+        for (let i = 0; i < 3; i++) {
+          const b = [base[0] - i * 3, base[1] + i * 2];
+          out += part(tube([b, [b[0] + 10 * s, b[1] + 16 * s], [b[0] + 13 * s - i * 3, b[1] + 32 * s]], [6, 4, 1.4]), col, 2.2);
+        }
+        return out;
+      },
+      toes(x, w) {
+        top.push(`<ellipse cx="${r1(x + w * .18)}" cy="${GY - 1}" rx="3" ry="2.2" fill="${C.horn}" stroke="${C.ol}" stroke-width="1.5"/><ellipse cx="${r1(x + w * .46)}" cy="${GY - 2}" rx="2.6" ry="2" fill="${C.horn}" stroke="${C.ol}" stroke-width="1.5"/>`);
+      },
+      face(at, o) {
+        let s = '';
+        if (o.cheek) { const p = at(...o.cheek); s += `<ellipse cx="${r1(p[0])}" cy="${r1(p[1])}" rx="5" ry="3.2" fill="#ff8fab" opacity=".45"/>`; }
+        if (o.smile) {
+          const [x1, y1, x2, y2, cv = 2] = o.smile;
+          const a = at(x1, y1), m = at((x1 + x2) / 2, (y1 + y2) / 2 + cv), b = at(x2, y2);
+          if (o.teeth) {
+            for (const tx of o.teeth) {
+              const u = Math.min(.95, Math.max(.05, (tx - x1) / (x2 - x1)));
+              const px = (1 - u) ** 2 * x1 + 2 * (1 - u) * u * ((x1 + x2) / 2) + u * u * x2;
+              const py = (1 - u) ** 2 * y1 + 2 * (1 - u) * u * ((y1 + y2) / 2 + cv) + u * u * y2;
+              s += `<path d="M${pt(at(px - 2.2, py - 1))} L${pt(at(px, py + 3.6))} L${pt(at(px + 2.2, py - 1))}Z" fill="#ffffff" stroke="${C.ol}" stroke-width="1.4" stroke-linejoin="round"/>`;
+            }
+          }
+          s += `<path d="M${pt(a)} Q${pt(m)} ${pt(b)}" fill="none" stroke="${C.ol}" stroke-width="2.6" stroke-linecap="round"/>`;
+        }
+        if (o.nostril) { const p = at(...o.nostril); s += `<ellipse cx="${r1(p[0])}" cy="${r1(p[1])}" rx="1.8" ry="1.3" fill="${C.ol}"/>`; }
+        const [ex, ey, er] = o.eye, e = at(ex, ey);
+        s += `<circle cx="${r1(e[0])}" cy="${r1(e[1])}" r="${er}" fill="#ffffff" stroke="${C.ol}" stroke-width="2.4"/>`;
+        s += `<circle cx="${r1(e[0] + er * .22)}" cy="${r1(e[1] + er * .08)}" r="${r1(er * .58)}" fill="${INK}"/>`;
+        s += `<circle cx="${r1(e[0] + er * .02)}" cy="${r1(e[1] - er * .26)}" r="${r1(er * .24)}" fill="#ffffff"/>`;
+        top.push(s);
+      },
+    };
+    const scene = PLANS[d.plan](A, d.f) || 'land';
+    const rnd = seeded(d.name);
+    let pattern = '';
+    if (box && d.pattern === 'spots') {
+      for (let i = 0; i < 7; i++) {
+        pattern += `<circle cx="${r1(box[0] + rnd() * (box[2] - box[0]))}" cy="${r1(box[1] + rnd() * (box[3] - box[1]))}" r="${r1(3 + rnd() * 3.5)}" fill="${C.accent}" opacity=".5"/>`;
+      }
+    } else if (box && d.pattern === 'stripes') {
+      for (let x = box[0] + 6; x < box[2]; x += 15) {
+        pattern += `<path d="M${r1(x)} ${box[1] - 14} L${r1(x - 7)} ${box[3] - 4}" stroke="${C.accent}" stroke-width="6" stroke-linecap="round" opacity=".42"/>`;
+      }
+    }
+    return `<svg viewBox="0 0 240 170" aria-hidden="true" focusable="false">`
+      + `<defs><clipPath id="${uid}">${sil.map(p => `<path d="${p}"/>`).join('')}</clipPath></defs>`
+      + sceneSVG(scene, shadow)
+      + `<g class="dino">${far.join('')}${back.join('')}${group(sil, C.body)}`
+      + `<g clip-path="url(#${uid})">${bellyD ? `<path d="${bellyD}" fill="${C.belly}"/>` : ''}${pattern}</g>`
+      + `${near.join('')}${top.join('')}</g></svg>`;
+  }
+  function pt(p) { return `${r1(p[0])} ${r1(p[1])}`; }
+  function sceneOf(d) { return d.plan === 'ptero' ? 'sky' : d.plan === 'marine' ? 'sea' : 'land'; }
+
+  // ---------- Page ----------
+
+  const THEMES = [
+    { bg: '#ffe3ea', rim: '#ff7a9c', dark: '#d94a70', accent: '#c2255c' },
+    { bg: '#fff3c4', rim: '#ffc93c', dark: '#d99a00', accent: '#a86200' },
+    { bg: '#d7f5e7', rim: '#4ccb94', dark: '#229c68', accent: '#0f7a50' },
+    { bg: '#dcebff', rim: '#5ea2f5', dark: '#2e74cf', accent: '#1d5fb8' },
+    { bg: '#ebe2ff', rim: '#9b7bf0', dark: '#6e4bd1', accent: '#5b37c4' },
+    { bg: '#ffe4d1', rim: '#ff9152', dark: '#db6420', accent: '#c04f0e' },
+  ];
+  const GAP_MS = 450;
+
+  const $ = id => document.getElementById(id);
+  const scene = $('scene'), cardsEl = $('cards'), strip = $('strip'), live = $('live');
+  const titleEl = $('title'), subEl = $('sub'), blockEl = $('block'), blockLetter = $('blockLetter');
+  const hintText = $('hintText'), soundBtn = $('soundBtn'), fsBtn = $('fsBtn');
+
+  const NUMBER_WORDS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  const breakName = name => name.replace(/(saurus|saura|ceratops|raptor|mimus|nychus|pteryx|lophus|cephale|cephalus|pelta|taurus|physis|gnathus|odon|don|tyrannus|titan|pterus|rhynchus|venator|cosaurus)(\s|$)/, '<wbr>$1$2');
+
+  let current = [], currentLetter = null;
+
+  function applyTheme(i) {
+    const t = THEMES[i % THEMES.length], s = document.documentElement.style;
+    s.setProperty('--bg', t.bg);
+    s.setProperty('--rim', t.rim);
+    s.setProperty('--rim-dark', t.dark);
+    s.setProperty('--accent', t.accent);
+  }
+
+  function cardHTML(d, i) {
+    const [sizeText, sizeIcon] = d.size;
+    const first = `<b>${d.name[0]}</b>${breakName(d.name.slice(1))}`;
+    return `<button class="card" type="button" data-i="${i}" style="--i:${i}" aria-label="${d.name}. ${DIET[d.diet]}. ${sizeText}.">`
+      + `<span class="art ${sceneOf(d)}">${drawDino(d, `c${i}`)}<span class="hear" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 9.5v5h4l5 4v-13l-5 4z" fill="currentColor"/><path d="M16 9a4.5 4.5 0 0 1 0 6M18.6 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></span>`
+      + `<span class="info"><span class="name">${first}</span><span class="say">${d.pron}</span>`
+      + `<span class="chips"><span class="chip">${DIET[d.diet].replace(/(\p{Extended_Pictographic}️?)/u, '<i>$1</i>')}</span><span class="chip">${sizeText} <i>${sizeIcon}</i></span></span></span>`
+      + `</button>`;
+  }
+
+  function showLetter(L, animate = true) {
+    const i = LETTERS.indexOf(L);
+    current = byLetter[L];
+    applyTheme(i);
+    scene.classList.toggle('still', !animate);
+    blockLetter.textContent = L;
+    if (animate) { blockEl.style.animation = 'none'; void blockEl.offsetWidth; blockEl.style.animation = ''; }
+    titleEl.innerHTML = `Dinosaurs that start with <b>${L}</b>`;
+    const n = current.length;
+    subEl.textContent = `${n} to meet. Tap one to hear its name.`;
+    cardsEl.innerHTML = current.map(cardHTML).join('');
+    fitCards();
+    scene.scrollTop = 0;
+    live.textContent = `${L}: ${current.map(d => d.name).join(', ')}`;
+    markKey(L, animate);
+    if (animate) { chime(i); say(`${L}.`); }
+  }
+
+  // Pick the largest card size that fits this letter's dinosaurs on one screen (scrolls if none does).
+  function fitCards() {
+    if (innerWidth <= 560 || !current.length) { cardsEl.style.removeProperty('--cw'); return; }
+    const gap = 16, W = cardsEl.clientWidth;
+    const H = scene.clientHeight - scene.querySelector('.head').offsetHeight - 40;
+    const info = cardsEl.querySelector('.info');
+    const infoH = (info ? info.offsetHeight : 110) + 8;
+    let best = 150;
+    for (let w = 236; w >= 150; w -= 4) {
+      const cols = Math.max(1, Math.floor((W + gap) / (w + gap)));
+      const rows = Math.ceil(current.length / cols);
+      if (rows * (w * 170 / 240 + infoH) + (rows - 1) * gap <= H) { best = w; break; }
+    }
+    cardsEl.style.setProperty('--cw', best + 'px');
+  }
+  let fitFrame = 0;
+  addEventListener('resize', () => { cancelAnimationFrame(fitFrame); fitFrame = requestAnimationFrame(fitCards); });
+
+  let talkTimer = 0;
+  function talk(card) {
+    const d = current[+card.dataset.i];
+    if (!d) return;
+    for (const c of cardsEl.querySelectorAll('.card.now')) c.classList.remove('now');
+    card.classList.remove('talk');
+    void card.offsetWidth;
+    card.classList.add('talk', 'now');
+    clearTimeout(talkTimer);
+    talkTimer = setTimeout(() => card.classList.remove('talk'), 850);
+    card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    chime(+card.dataset.i + 2, .5);
+    say(d.say, .8);
+    live.textContent = d.name;
+  }
+
+  const randomLetter = () => {
+    let L;
+    do L = LETTERS[Math.floor(Math.random() * 26)]; while (L === currentLetter);
+    return L;
+  };
+
+  // ---------- Alphabet strip ----------
+
+  const keys = {};
+  [...LETTERS].forEach((L, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'key';
+    b.textContent = L;
+    b.setAttribute('aria-label', `Dinosaurs that start with ${L}`);
+    b.style.setProperty('--c', THEMES[i % THEMES.length].rim);
+    b.addEventListener('click', () => trigger(() => showLetter(L)));
+    strip.append(b);
+    keys[L] = b;
+  });
+
+  function markKey(L, seen = true) {
+    if (currentLetter) keys[currentLetter].classList.remove('now');
+    currentLetter = L;
+    keys[L].classList.add('now');
+    if (seen) keys[L].classList.add('seen');
+  }
+
+  // ---------- Sound ----------
+
+  let soundOn = true;
+  try { soundOn = localStorage.getItem('dino-sound') !== 'off'; } catch {}
+  let actx = null;
+
+  function chime(i, octave = 1) {
+    if (!soundOn || !actx) return;
+    try {
+      const steps = [0, 2, 4, 7, 9];
+      const semi = steps[i % 5] + 12 * (Math.floor(i / 5) % 2);
+      const f = 392 * octave * Math.pow(2, semi / 12);
+      const t = actx.currentTime;
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.2, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      g.connect(actx.destination);
+      for (const [mult, type, level] of [[1, 'triangle', 1], [2, 'sine', 0.3]]) {
+        const o = actx.createOscillator(), og = actx.createGain();
+        o.type = type;
+        o.frequency.value = f * mult;
+        og.gain.value = level;
+        o.connect(og).connect(g);
+        o.start(t);
+        o.stop(t + 0.65);
+      }
+    } catch {}
+  }
+
+  const canSpeak = 'speechSynthesis' in window;
+  let voice = null, speakTimer = 0;
+  function pickVoice() {
+    try {
+      const en = speechSynthesis.getVoices().filter(v => /^en([-_]|$)/i.test(v.lang));
+      voice = en.find(v => /Samantha|Google US English|Aria|Jenny|Ava|Karen|Serena/i.test(v.name))
+        || en.find(v => v.default) || en[0] || null;
+    } catch {}
+  }
+  if (canSpeak) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+
+  function say(text, rate = 0.85) {
+    if (!soundOn || !canSpeak) return;
+    clearTimeout(speakTimer);
+    try { speechSynthesis.cancel(); } catch {}
+    speakTimer = setTimeout(() => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+        u.rate = rate;
+        u.pitch = 1.15;
+        speechSynthesis.speak(u);
+      } catch {}
+    }, 200);
+  }
+
+  function setSound(on) {
+    soundOn = on;
+    soundBtn.setAttribute('aria-pressed', String(on));
+    soundBtn.querySelector('span').textContent = on ? 'Sound on' : 'Sound off';
+    if (!on && canSpeak) { clearTimeout(speakTimer); try { speechSynthesis.cancel(); } catch {} }
+    try { localStorage.setItem('dino-sound', on ? 'on' : 'off'); } catch {}
+  }
+  soundBtn.addEventListener('click', () => { wake(); setSound(!soundOn); });
+  setSound(soundOn);
+
+  // ---------- Input ----------
+
+  let lastAt = 0, lastTalk = 0, wakeLock = null;
+
+  function wake() {
+    if (!actx) {
+      try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+    }
+    if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
+    if (!wakeLock && navigator.wakeLock) {
+      navigator.wakeLock.request('screen').then(l => {
+        wakeLock = l;
+        l.addEventListener('release', () => { wakeLock = null; });
+      }).catch(() => {});
+    }
+  }
+
+  function trigger(fn) {
+    const now = performance.now();
+    if (now - lastAt < GAP_MS) return;
+    lastAt = now;
+    wake();
+    fn();
+  }
+
+  function talkTo(card) {
+    const now = performance.now();
+    if (!card || now - lastTalk < 250) return;
+    lastTalk = now;
+    wake();
+    card.focus({ preventScroll: true });
+    talk(card);
+  }
+
+  cardsEl.addEventListener('click', e => talkTo(e.target.closest('.card')));
+
+  addEventListener('keydown', e => {
+    if (/^F\d{1,2}$/.test(e.key)) return; // leave F5 / F11 for grown-ups
+    e.preventDefault();
+    if (e.repeat) return;
+    const ch = e.key && e.key.length === 1 ? e.key.toUpperCase() : '';
+    const cards = [...cardsEl.querySelectorAll('.card')];
+    const at = cards.indexOf(document.activeElement);
+    let m;
+    if (/^[A-Z]$/.test(ch)) trigger(() => showLetter(ch));
+    else if ((m = /^Key([A-Z])$/.exec(e.code))) trigger(() => showLetter(m[1]));
+    else if (/^[1-9]$/.test(ch)) talkTo(cards[+ch - 1]);
+    else if ((m = /^(?:Digit|Numpad)([1-9])$/.exec(e.code))) talkTo(cards[+m[1] - 1]);
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') talkTo(cards[(at + 1) % cards.length]);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') talkTo(cards[(at - 1 + cards.length) % cards.length]);
+    else if ((e.key === 'Enter' || e.key === ' ') && at >= 0) talkTo(cards[at]);
+    else trigger(() => showLetter(randomLetter())); // other keys still do something
+  });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  function syncFocus() {
+    const focused = document.hasFocus();
+    document.body.classList.toggle('away', !focused);
+    hintText.textContent = focused ? 'Press a letter, then tap a dinosaur' : 'Tap or click to start';
+  }
+  addEventListener('focus', syncFocus);
+  addEventListener('blur', syncFocus);
+  syncFocus();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && lastAt) wake();
+  });
+
+  // ---------- Full screen ----------
+
+  if (!document.fullscreenEnabled) fsBtn.hidden = true;
+  fsBtn.addEventListener('click', async () => {
+    wake();
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else {
+        await document.documentElement.requestFullscreen();
+        try { await navigator.keyboard?.lock?.(); } catch {}
+      }
+    } catch {}
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const on = !!document.fullscreenElement;
+    fsBtn.setAttribute('aria-pressed', String(on));
+    fsBtn.querySelector('span').textContent = on ? 'Exit full screen' : 'Full screen';
+  });
+
+  showLetter('B', false);
+  window.__dino = { DINOS, drawDino, byLetter }; // used by the preview-image script
+})();
+</script>
+</body>
+</html>
