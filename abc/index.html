@@ -522,12 +522,11 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
     } else {
       const c = pick(COUNTABLES, 'count');
       const noun = n === 1 ? c.one : c.many;
-      const counting = NUMBERS.slice(1, n + 1).join(', ');
       draw({
         theme: n, glyph: String(n), small: '', items: Array(n).fill(c.e),
         lead: 'Let’s count', word: `<b>${NUMBERS[n]}</b> ${noun}`,
         label: `${n} ${noun}`,
-        speech: n === 1 ? `One ${noun}!` : `${counting}. ${NUMBERS[n]} ${noun}!`,
+        speech: `${NUMBERS[n]} ${noun}!`,
         animate: true,
       });
     }
