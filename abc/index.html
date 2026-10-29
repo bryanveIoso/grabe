@@ -366,51 +366,50 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
   // Word and picture for each letter; one is picked at random on every press.
+  // Words that start with their letter read "A is for Apple", the rest read "X is in Fox".
   const WORDS = {
-    A: 'Apple 🍎|Ant 🐜|Avocado 🥑|Airplane ✈️|Anchor ⚓',
-    B: 'Banana 🍌|Bear 🐻|Bee 🐝|Bus 🚌|Butterfly 🦋|Balloon 🎈|Ball ⚽',
-    C: 'Cat 🐱|Cow 🐮|Car 🚗|Cake 🍰|Carrot 🥕|Cherries 🍒|Crab 🦀',
-    D: 'Dog 🐶|Duck 🦆|Dolphin 🐬|Drum 🥁|Donut 🍩|Dinosaur 🦕',
-    E: 'Elephant 🐘|Egg 🥚|Eagle 🦅|Earth 🌍',
-    F: 'Fish 🐟|Frog 🐸|Flower 🌸|Fox 🦊|Fire truck 🚒|Flamingo 🦩',
-    G: 'Grapes 🍇|Giraffe 🦒|Goat 🐐|Guitar 🎸|Gift 🎁',
-    H: 'Horse 🐴|House 🏠|Hat 👒|Hedgehog 🦔|Honey 🍯|Heart ❤️',
-    I: 'Ice cream 🍦|Island 🏝️|Ice 🧊',
-    J: 'Juice 🧃|Jeans 👖|Jacket 🧥',
-    K: 'Kangaroo 🦘|Key 🔑|Kite 🪁|Koala 🐨|Kiwi 🥝',
-    L: 'Lion 🦁|Lemon 🍋|Ladybug 🐞|Leaf 🍃|Llama 🦙|Lollipop 🍭',
-    M: 'Monkey 🐵|Moon 🌙|Mouse 🐭|Mango 🥭|Mushroom 🍄|Milk 🥛',
-    N: 'Noodles 🍜|Nose 👃|Nuts 🥜|Note 🎵',
-    O: 'Owl 🦉|Orange 🍊|Octopus 🐙|Otter 🦦|Ox 🐂',
-    P: 'Pig 🐷|Penguin 🐧|Pear 🍐|Pineapple 🍍|Panda 🐼|Pizza 🍕',
-    Q: 'Queen 👸|Quack 🦆|Quiet 🤫',
-    R: 'Rabbit 🐰|Rainbow 🌈|Rocket 🚀|Rooster 🐓|Robot 🤖',
-    S: 'Sun ☀️|Star ⭐|Snake 🐍|Strawberry 🍓|Sheep 🐑|Snail 🐌',
-    T: 'Tiger 🐯|Turtle 🐢|Train 🚂|Tomato 🍅|Tree 🌳|Teddy bear 🧸',
-    U: 'Umbrella ☂️|Unicorn 🦄|Upside down 🙃',
-    V: 'Violin 🎻|Volcano 🌋|Van 🚐|Vegetables 🥦',
-    W: 'Whale 🐳|Watermelon 🍉|Wolf 🐺|Watch ⌚|Wave 🌊',
-    X: 'Fox 🦊|Box 📦|T. rex 🦖',
-    Y: 'Yo-yo 🪀|Yarn 🧶|Yawn 🥱',
-    Z: 'Zebra 🦓|Zzz 💤',
+    A: 'Apple 🍎|Ant 🐜|Avocado 🥑|Airplane ✈️|Anchor ⚓|Alligator 🐊|Angel 👼|Ambulance 🚑|Alarm clock ⏰|Art 🎨|Abacus 🧮',
+    B: 'Banana 🍌|Bear 🐻|Bee 🐝|Bus 🚌|Butterfly 🦋|Balloon 🎈|Ball ⚽|Bird 🐦|Book 📖|Bread 🍞|Bicycle 🚲|Boat ⛵|Baby 👶|Bell 🔔|Broccoli 🥦',
+    C: 'Cat 🐱|Cow 🐮|Car 🚗|Cake 🍰|Carrot 🥕|Cherries 🍒|Crab 🦀|Chicken 🐔|Cookie 🍪|Corn 🌽|Camel 🐫|Castle 🏰|Crown 👑|Cupcake 🧁|Cheese 🧀',
+    D: 'Dog 🐶|Duck 🦆|Dolphin 🐬|Drum 🥁|Donut 🍩|Dinosaur 🦕|Deer 🦌|Dragon 🐉|Door 🚪|Diamond 💎|Dice 🎲|Dove 🕊️|Dress 👗',
+    E: 'Elephant 🐘|Egg 🥚|Eagle 🦅|Earth 🌍|Ear 👂|Eyes 👀|Envelope ✉️|Elf 🧝|Evergreen tree 🌲|Elevator 🛗|Eight 8️⃣',
+    F: 'Fish 🐟|Frog 🐸|Flower 🌸|Fox 🦊|Fire truck 🚒|Flamingo 🦩|Flag 🚩|Feather 🪶|Football 🏈|Fries 🍟|Foot 🦶|Fairy 🧚|Fireworks 🎆',
+    G: 'Grapes 🍇|Giraffe 🦒|Goat 🐐|Guitar 🎸|Gift 🎁|Gorilla 🦍|Ghost 👻|Glasses 👓|Gloves 🧤|Garlic 🧄|Game 🎮|Grandma 👵|Grandpa 👴',
+    H: 'Horse 🐴|House 🏠|Hat 👒|Hedgehog 🦔|Honey 🍯|Heart ❤️|Hamburger 🍔|Hippo 🦛|Helicopter 🚁|Hamster 🐹|Hand ✋|Hot dog 🌭|Hibiscus 🌺',
+    I: 'Ice cream 🍦|Island 🏝️|Ice 🧊|Iguana 🦎|Inchworm 🐛|Insect 🪲|Ice skates ⛸️|Ice hockey 🏒|Idea 💡|Itsy bitsy spider 🕷️|Ice cream sundae 🍨',
+    J: "Juice 🧃|Jeans 👖|Jacket 🧥|Jellyfish 🪼|Jack-o'-lantern 🎃|Jar 🫙|Jet 🛩️|Juggler 🤹|Jigsaw puzzle 🧩|Jeep 🚙|Jaguar 🐆|Joystick 🕹️",
+    K: 'Kangaroo 🦘|Key 🔑|Kite 🪁|Koala 🐨|Kiwi 🥝|Kitten 🐈|King 🤴|Kiss 😘|Keyboard ⌨️|Kettle 🫖|Kimono 👘|Kick scooter 🛴|Kayak 🛶',
+    L: 'Lion 🦁|Lemon 🍋|Ladybug 🐞|Leaf 🍃|Llama 🦙|Lollipop 🍭|Leopard 🐆|Lizard 🦎|Lobster 🦞|Lock 🔒|Lips 👄|Leg 🦵|Lettuce 🥬|Laptop 💻',
+    M: 'Monkey 🐵|Moon 🌙|Mouse 🐭|Mango 🥭|Mushroom 🍄|Milk 🥛|Mermaid 🧜‍♀️|Magnet 🧲|Map 🗺️|Motorcycle 🏍️|Mountain ⛰️|Melon 🍈|Medal 🏅',
+    N: 'Noodles 🍜|Nose 👃|Nuts 🥜|Note 🎵|Nest 🪺|Necktie 👔|Newspaper 📰|Night 🌃|Nine 9️⃣|Notebook 📓|Net 🥅|Nap 😴',
+    O: 'Owl 🦉|Orange 🍊|Octopus 🐙|Otter 🦦|Ox 🐂|Olive 🫒|Onion 🧅|Ocean 🌊|Orangutan 🦧|Oyster 🦪|One 1️⃣|Omelet 🍳',
+    P: 'Pig 🐷|Penguin 🐧|Pear 🍐|Pineapple 🍍|Panda 🐼|Pizza 🍕|Parrot 🦜|Peacock 🦚|Pumpkin 🎃|Popcorn 🍿|Puppy 🐕|Potato 🥔|Pancakes 🥞|Paintbrush 🖌️|Pencil ✏️',
+    Q: 'Queen 👸|Quack 🦆|Quiet 🤫|Question ❓|Quarter moon 🌓|Quill 🪶|Queen bee 🐝|Squid 🦑|Squirrel 🐿️|Square 🟦',
+    R: 'Rabbit 🐰|Rainbow 🌈|Rocket 🚀|Rooster 🐓|Robot 🤖|Rose 🌹|Rhino 🦏|Raccoon 🦝|Ring 💍|Rice 🍚|Rain 🌧️|Racing car 🏎️|Radio 📻',
+    S: 'Sun ☀️|Star ⭐|Snake 🐍|Strawberry 🍓|Sheep 🐑|Snail 🐌|Shoe 👟|Snowman ⛄|Shark 🦈|Swan 🦢|Sloth 🦥|Sandwich 🥪|Socks 🧦|Ship 🚢',
+    T: 'Tiger 🐯|Turtle 🐢|Train 🚂|Tomato 🍅|Tree 🌳|Teddy bear 🧸|Tractor 🚜|Taco 🌮|Tooth 🦷|Tent ⛺|Trumpet 🎺|Turkey 🦃|Truck 🚚|Tulip 🌷|T-shirt 👕',
+    U: 'Umbrella ☂️|Unicorn 🦄|Upside down 🙃|UFO 🛸|Underwear 🩲|Uniform 🥋|Utensils 🍴|Duck 🦆|Bus 🚌|Cupcake 🧁|Sun ☀️|Drum 🥁',
+    V: 'Violin 🎻|Volcano 🌋|Van 🚐|Vegetables 🥦|Vase 🏺|Video game 🎮|Volleyball 🏐|Vest 🦺|Valentine 💌|Five 5️⃣|Seven 7️⃣|Glove 🧤|Dove 🕊️',
+    W: 'Whale 🐳|Watermelon 🍉|Wolf 🐺|Watch ⌚|Wave 🌊|Worm 🪱|Wheel 🛞|Window 🪟|Wizard 🧙|Waffle 🧇|Wind 🌬️|Wrench 🔧',
+    X: 'Fox 🦊|Box 📦|T. rex 🦖|Ox 🐂|Taxi 🚕|Saxophone 🎷|Mailbox 📫|Toolbox 🧰|Juice box 🧃|X-ray 🩻|Six 6️⃣',
+    Y: 'Yo-yo 🪀|Yarn 🧶|Yawn 🥱|Yellow 💛|Yacht 🛥️|Yum 😋|Yes 👍|Baby 👶|Monkey 🐵|Butterfly 🦋|Bunny 🐰|Happy 😊|Key 🔑',
+    Z: 'Zebra 🦓|Zzz 💤|Zero 0️⃣|Zipper 🤐|Zucchini 🥒|Zigzag ⚡|Pizza 🍕|Puzzle 🧩|Lizard 🦎|Pretzel 🥨|Freeze 🥶',
   };
-  // X words end in x, so X reads "X is in Fox" instead of "X is for".
-  const IN_WORD = new Set(['X']);
   // How some words should be spoken aloud.
-  const SAY = { 'Zzz': 'z z z. Sleepy time', 'Quiet': 'quiet. Shhh', 'Quack': 'quack quack', 'T. rex': 'T rex' };
+  const SAY = { 'Zzz': 'z z z. Sleepy time', 'Quiet': 'quiet. Shhh', 'Quack': 'quack quack', 'T. rex': 'T rex', 'UFO': 'U F O' };
 
-  const COUNTABLES = [
-    { e: '⭐', one: 'star', many: 'stars' },
-    { e: '🐞', one: 'ladybug', many: 'ladybugs' },
-    { e: '🍓', one: 'strawberry', many: 'strawberries' },
-    { e: '🐥', one: 'chick', many: 'chicks' },
-    { e: '🎈', one: 'balloon', many: 'balloons' },
-    { e: '🍪', one: 'cookie', many: 'cookies' },
-    { e: '🐟', one: 'fish', many: 'fish' },
-    { e: '🌸', one: 'flower', many: 'flowers' },
-    { e: '🚗', one: 'car', many: 'cars' },
-    { e: '🦆', one: 'duck', many: 'ducks' },
-  ];
+  // Things to count for 1-9, written as "picture one/many".
+  const COUNTABLES = ('⭐ star/stars|🐞 ladybug/ladybugs|🍓 strawberry/strawberries|🐥 chick/chicks|🎈 balloon/balloons|'
+    + '🍪 cookie/cookies|🐟 fish/fish|🌸 flower/flowers|🚗 car/cars|🦆 duck/ducks|🍎 apple/apples|🍌 banana/bananas|'
+    + '🦋 butterfly/butterflies|🐸 frog/frogs|🐝 bee/bees|❤️ heart/hearts|⚽ ball/balls|🧁 cupcake/cupcakes|'
+    + '🐢 turtle/turtles|🦀 crab/crabs|⛵ boat/boats|🐰 bunny/bunnies|🐷 pig/pigs|🥕 carrot/carrots')
+    .split('|').map(s => {
+      const [e, names] = s.split(' ');
+      const [one, many] = names.split('/');
+      return { e, one, many };
+    });
+  // Zero is round, like one of these.
+  const ROUND = 'donut 🍩|ball ⚽|orange 🍊|cookie 🍪|wheel 🛞|bagel 🥯|full moon 🌕|coin 🪙|ring 💍|basketball 🏀|tomato 🍅|clock 🕒';
   const NUMBERS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
   const THEMES = [
@@ -429,13 +428,13 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   const hintText = $('hintText'), soundBtn = $('soundBtn'), fsBtn = $('fsBtn');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
+  const parseList = str => str.split('|').map(s => {
+    const at = s.lastIndexOf(' ');
+    return { word: s.slice(0, at), emoji: s.slice(at + 1) };
+  });
   const entries = {};
-  for (const L of LETTERS) {
-    entries[L] = WORDS[L].split('|').map(s => {
-      const at = s.lastIndexOf(' ');
-      return { word: s.slice(0, at), emoji: s.slice(at + 1) };
-    });
-  }
+  for (const L of LETTERS) entries[L] = parseList(WORDS[L]);
+  const roundThings = parseList(ROUND);
   const lastPick = {};
   const pick = (list, key) => {
     let k = Math.floor(Math.random() * list.length);
@@ -494,7 +493,7 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   function showLetter(L, animate = true, forced) {
     const i = LETTERS.indexOf(L);
     const { word, emoji } = forced || pick(entries[L], L);
-    const rel = IN_WORD.has(L) ? 'in' : 'for';
+    const rel = word[0].toUpperCase() === L ? 'for' : 'in';
     const spoken = SAY[word] || word.toLowerCase();
     draw({
       theme: i,
@@ -512,11 +511,13 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
   function showNumber(n) {
     if (n === 0) {
+      const { word: thing, emoji } = pick(roundThings, 'round');
+      const like = /^[aeiou]/.test(thing) ? 'like an' : 'like a';
       draw({
-        theme: 0, glyph: '0', small: '', items: ['🍩'],
-        lead: 'Zero is round', word: 'like a <b>donut</b>',
-        label: 'Zero is round like a donut',
-        speech: 'Zero is round, like a donut.',
+        theme: 0, glyph: '0', small: '', items: [emoji],
+        lead: 'Zero is round', word: `${like} <b>${thing}</b>`,
+        label: `Zero is round ${like} ${thing}`,
+        speech: `Zero is round, ${like} ${thing}.`,
         animate: true,
       });
     } else {
