@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>A is for Apple</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A first ABC game for babies and toddlers. Press any key and a letter pops up on a toy block, with a picture and a friendly voice. A is for Apple!">
+<meta name="theme-color" content="#ffe3ea">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='12' fill='%23ff7a9c'/%3E%3Crect x='11' y='11' width='42' height='42' rx='8' fill='%23fffdf8'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial Rounded MT Bold,Arial,sans-serif' font-weight='700' font-size='34' fill='%23c2255c'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Link previews. If the game moves away from https://grabe.com/, change these URLs. -->
+<link rel="canonical" href="https://grabe.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://grabe.com/">
+<meta property="og:title" content="A is for Apple · A first ABC game for babies">
+<meta property="og:description" content="Press any key and a letter pops up on a toy block, with a picture and a friendly voice. 30+ pictures for every letter.">
+<meta property="og:image" content="https://grabe.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pink toy block with the letter A next to a red apple, and the words A is for Apple">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A is for Apple · A first ABC game for babies">
+<meta name="twitter:description" content="Press any key and a letter pops up on a toy block, with a picture and a friendly voice. 30+ pictures for every letter.">
+<meta name="twitter:image" content="https://grabe.com/og-image.png">
+<meta name="twitter:image:alt" content="A pink toy block with the letter A next to a red apple, and the words A is for Apple">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800&family=Noto+Color+Emoji&display=swap">
@@ -368,35 +387,104 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   // Word and picture for each letter; one is picked at random on every press.
   // Words that start with their letter read "A is for Apple", the rest read "X is in Fox".
   const WORDS = {
-    A: 'Apple 🍎|Ant 🐜|Avocado 🥑|Airplane ✈️|Anchor ⚓|Alligator 🐊|Angel 👼|Ambulance 🚑|Alarm clock ⏰|Art 🎨|Abacus 🧮',
-    B: 'Banana 🍌|Bear 🐻|Bee 🐝|Bus 🚌|Butterfly 🦋|Balloon 🎈|Ball ⚽|Bird 🐦|Book 📖|Bread 🍞|Bicycle 🚲|Boat ⛵|Baby 👶|Bell 🔔|Broccoli 🥦',
-    C: 'Cat 🐱|Cow 🐮|Car 🚗|Cake 🍰|Carrot 🥕|Cherries 🍒|Crab 🦀|Chicken 🐔|Cookie 🍪|Corn 🌽|Camel 🐫|Castle 🏰|Crown 👑|Cupcake 🧁|Cheese 🧀',
-    D: 'Dog 🐶|Duck 🦆|Dolphin 🐬|Drum 🥁|Donut 🍩|Dinosaur 🦕|Deer 🦌|Dragon 🐉|Door 🚪|Diamond 💎|Dice 🎲|Dove 🕊️|Dress 👗',
-    E: 'Elephant 🐘|Egg 🥚|Eagle 🦅|Earth 🌍|Ear 👂|Eyes 👀|Envelope ✉️|Elf 🧝|Evergreen tree 🌲|Elevator 🛗|Eight 8️⃣',
-    F: 'Fish 🐟|Frog 🐸|Flower 🌸|Fox 🦊|Fire truck 🚒|Flamingo 🦩|Flag 🚩|Feather 🪶|Football 🏈|Fries 🍟|Foot 🦶|Fairy 🧚|Fireworks 🎆',
-    G: 'Grapes 🍇|Giraffe 🦒|Goat 🐐|Guitar 🎸|Gift 🎁|Gorilla 🦍|Ghost 👻|Glasses 👓|Gloves 🧤|Garlic 🧄|Game 🎮|Grandma 👵|Grandpa 👴',
-    H: 'Horse 🐴|House 🏠|Hat 👒|Hedgehog 🦔|Honey 🍯|Heart ❤️|Hamburger 🍔|Hippo 🦛|Helicopter 🚁|Hamster 🐹|Hand ✋|Hot dog 🌭|Hibiscus 🌺',
-    I: 'Ice cream 🍦|Island 🏝️|Ice 🧊|Iguana 🦎|Inchworm 🐛|Insect 🪲|Ice skates ⛸️|Ice hockey 🏒|Idea 💡|Itsy bitsy spider 🕷️|Ice cream sundae 🍨',
-    J: "Juice 🧃|Jeans 👖|Jacket 🧥|Jellyfish 🪼|Jack-o'-lantern 🎃|Jar 🫙|Jet 🛩️|Juggler 🤹|Jigsaw puzzle 🧩|Jeep 🚙|Jaguar 🐆|Joystick 🕹️",
-    K: 'Kangaroo 🦘|Key 🔑|Kite 🪁|Koala 🐨|Kiwi 🥝|Kitten 🐈|King 🤴|Kiss 😘|Keyboard ⌨️|Kettle 🫖|Kimono 👘|Kick scooter 🛴|Kayak 🛶',
-    L: 'Lion 🦁|Lemon 🍋|Ladybug 🐞|Leaf 🍃|Llama 🦙|Lollipop 🍭|Leopard 🐆|Lizard 🦎|Lobster 🦞|Lock 🔒|Lips 👄|Leg 🦵|Lettuce 🥬|Laptop 💻',
-    M: 'Monkey 🐵|Moon 🌙|Mouse 🐭|Mango 🥭|Mushroom 🍄|Milk 🥛|Mermaid 🧜‍♀️|Magnet 🧲|Map 🗺️|Motorcycle 🏍️|Mountain ⛰️|Melon 🍈|Medal 🏅',
-    N: 'Noodles 🍜|Nose 👃|Nuts 🥜|Note 🎵|Nest 🪺|Necktie 👔|Newspaper 📰|Night 🌃|Nine 9️⃣|Notebook 📓|Net 🥅|Nap 😴',
-    O: 'Owl 🦉|Orange 🍊|Octopus 🐙|Otter 🦦|Ox 🐂|Olive 🫒|Onion 🧅|Ocean 🌊|Orangutan 🦧|Oyster 🦪|One 1️⃣|Omelet 🍳',
-    P: 'Pig 🐷|Penguin 🐧|Pear 🍐|Pineapple 🍍|Panda 🐼|Pizza 🍕|Parrot 🦜|Peacock 🦚|Pumpkin 🎃|Popcorn 🍿|Puppy 🐕|Potato 🥔|Pancakes 🥞|Paintbrush 🖌️|Pencil ✏️',
-    Q: 'Queen 👸|Quack 🦆|Quiet 🤫|Question ❓|Quarter moon 🌓|Quill 🪶|Queen bee 🐝|Squid 🦑|Squirrel 🐿️|Square 🟦',
-    R: 'Rabbit 🐰|Rainbow 🌈|Rocket 🚀|Rooster 🐓|Robot 🤖|Rose 🌹|Rhino 🦏|Raccoon 🦝|Ring 💍|Rice 🍚|Rain 🌧️|Racing car 🏎️|Radio 📻',
-    S: 'Sun ☀️|Star ⭐|Snake 🐍|Strawberry 🍓|Sheep 🐑|Snail 🐌|Shoe 👟|Snowman ⛄|Shark 🦈|Swan 🦢|Sloth 🦥|Sandwich 🥪|Socks 🧦|Ship 🚢',
-    T: 'Tiger 🐯|Turtle 🐢|Train 🚂|Tomato 🍅|Tree 🌳|Teddy bear 🧸|Tractor 🚜|Taco 🌮|Tooth 🦷|Tent ⛺|Trumpet 🎺|Turkey 🦃|Truck 🚚|Tulip 🌷|T-shirt 👕',
-    U: 'Umbrella ☂️|Unicorn 🦄|Upside down 🙃|UFO 🛸|Underwear 🩲|Uniform 🥋|Utensils 🍴|Duck 🦆|Bus 🚌|Cupcake 🧁|Sun ☀️|Drum 🥁',
-    V: 'Violin 🎻|Volcano 🌋|Van 🚐|Vegetables 🥦|Vase 🏺|Video game 🎮|Volleyball 🏐|Vest 🦺|Valentine 💌|Five 5️⃣|Seven 7️⃣|Glove 🧤|Dove 🕊️',
-    W: 'Whale 🐳|Watermelon 🍉|Wolf 🐺|Watch ⌚|Wave 🌊|Worm 🪱|Wheel 🛞|Window 🪟|Wizard 🧙|Waffle 🧇|Wind 🌬️|Wrench 🔧',
-    X: 'Fox 🦊|Box 📦|T. rex 🦖|Ox 🐂|Taxi 🚕|Saxophone 🎷|Mailbox 📫|Toolbox 🧰|Juice box 🧃|X-ray 🩻|Six 6️⃣',
-    Y: 'Yo-yo 🪀|Yarn 🧶|Yawn 🥱|Yellow 💛|Yacht 🛥️|Yum 😋|Yes 👍|Baby 👶|Monkey 🐵|Butterfly 🦋|Bunny 🐰|Happy 😊|Key 🔑',
-    Z: 'Zebra 🦓|Zzz 💤|Zero 0️⃣|Zipper 🤐|Zucchini 🥒|Zigzag ⚡|Pizza 🍕|Puzzle 🧩|Lizard 🦎|Pretzel 🥨|Freeze 🥶',
+    A: `Apple 🍎|Ant 🐜|Avocado 🥑|Airplane ✈️|Anchor ⚓|Alligator 🐊|Ambulance 🚑|Alarm clock ⏰|Art 🎨|Abacus 🧮|Arm 💪
+      |Astronaut 🧑‍🚀|Accordion 🪗|Alien 👽|Arrow ➡️|Apartment 🏢|Airport 🛫|Amusement park 🎢|Antenna 📡|Applause 👏
+      |Alpaca 🦙|Angry 😠|Asleep 😴|Acrobat 🤸|Aquarium 🐠|Atlas 🗺️|Award 🏆|Automobile 🚗|Arcade 🕹️|Anchovy 🐟
+      |Asteroid ☄️|Apple pie 🥧`,
+    B: `Banana 🍌|Bear 🐻|Bee 🐝|Bus 🚌|Butterfly 🦋|Balloon 🎈|Ball ⚽|Bird 🐦|Book 📖|Bread 🍞|Bicycle 🚲|Boat ⛵
+      |Baby 👶|Bell 🔔|Broccoli 🥦|Basketball 🏀|Baseball ⚾|Bat 🦇|Beaver 🦫|Bison 🦬|Blueberries 🫐|Bagel 🥯|Bacon 🥓
+      |Burrito 🌯|Butter 🧈|Backpack 🎒|Basket 🧺|Bathtub 🛁|Bed 🛏️|Bone 🦴|Bow 🎀|Bubbles 🫧|Bunny 🐰|Burger 🍔
+      |Bowl 🥣|Boot 👢|Banjo 🪕|Beach 🏖️|Blowfish 🐡|Broom 🧹|Bucket 🪣`,
+    C: `Cat 🐱|Cow 🐮|Car 🚗|Cake 🍰|Carrot 🥕|Cherries 🍒|Crab 🦀|Chicken 🐔|Cookie 🍪|Corn 🌽|Camel 🐫|Castle 🏰
+      |Crown 👑|Cupcake 🧁|Cheese 🧀|Candy 🍬|Candle 🕯️|Cactus 🌵|Camera 📷|Canoe 🛶|Cap 🧢|Carousel 🎠|Chipmunk 🐿️
+      |Chick 🐥|Chocolate 🍫|Cloud ☁️|Coconut 🥥|Coat 🧥|Compass 🧭|Computer 💻|Crayon 🖍️|Cricket 🦗|Crocodile 🐊
+      |Croissant 🥐|Cucumber 🥒|Cup 🥤|Curry 🍛|Caterpillar 🐛|Chair 🪑|Clock 🕰️|Clover 🍀|Coin 🪙|Couch 🛋️
+      |Cherry blossom 🌸`,
+    D: `Dog 🐶|Duck 🦆|Dolphin 🐬|Drum 🥁|Donut 🍩|Dinosaur 🦕|Deer 🦌|Dragon 🐉|Door 🚪|Diamond 💎|Dice 🎲|Dove 🕊️
+      |Dress 👗|Daisy 🌼|Dumpling 🥟|Dodo 🦤|Doctor 🧑‍⚕️|Doll 🪆|Dinner 🍽️|Dart 🎯|Drink 🥤|Drop 💧|Desert 🏜️
+      |Dancer 💃|Diving mask 🤿|Duckling 🐤|Donkey 🫏|Drumstick 🍗|Daddy 👨|Dash 💨|Dizzy 💫|Dot 🔴`,
+    E: `Elephant 🐘|Egg 🥚|Eagle 🦅|Earth 🌍|Ear 👂|Eyes 👀|Envelope ✉️|Evergreen tree 🌲|Elevator 🛗|Eight 8️⃣
+      |Eggplant 🍆|Engine 🚂|Ewe 🐑|Eyeglasses 👓|Excited 🤩|Eat 🍽️|Exercise 🏋️|Earthworm 🪱|Emergency 🚨|Exit 🚪
+      |Electric plug 🔌|Bee 🐝|Tree 🌳|Cheese 🧀|Bed 🛏️|Pear 🍐|Leaf 🍃|Bell 🔔|Helicopter 🚁|Feet 🦶|Feather 🪶`,
+    F: `Fish 🐟|Frog 🐸|Flower 🌸|Fox 🦊|Fire truck 🚒|Flamingo 🦩|Flag 🚩|Feather 🪶|Football 🏈|Fries 🍟|Foot 🦶
+      |Fireworks 🎆|Fire 🔥|Fan 🪭|Farmer 🧑‍🌾|Ferris wheel 🎡|Ferry ⛴️|Finger ☝️|Firefighter 🧑‍🚒|Flashlight 🔦|Fly 🪰
+      |Fountain ⛲|Frisbee 🥏|Frying pan 🍳|Face 🙂|Family 👪|Father 👨|Fishing pole 🎣|Flute 🪈|Funny 😆|Frown 🙁
+      |Freeze 🥶|Full moon 🌕|Flying saucer 🛸`,
+    G: `Grapes 🍇|Giraffe 🦒|Goat 🐐|Guitar 🎸|Gift 🎁|Gorilla 🦍|Glasses 👓|Gloves 🧤|Garlic 🧄|Game 🎮|Grandma 👵
+      |Grandpa 👴|Girl 👧|Goose 🪿|Globe 🌎|Gem 💎|Goal 🥅|Gold medal 🥇|Golf ⛳|Grass 🌿|Grasshopper 🦗|Green apple 🍏
+      |Green 💚|Grin 😁|Guide dog 🦮|Guinea pig 🐹|Garden 🏡|Gecko 🦎|Gondola 🚠|Gear ⚙️`,
+    H: `Horse 🐴|House 🏠|Hat 👒|Hedgehog 🦔|Honey 🍯|Heart ❤️|Hamburger 🍔|Hippo 🦛|Helicopter 🚁|Hamster 🐹|Hand ✋
+      |Hot dog 🌭|Hibiscus 🌺|Hammer 🔨|Hatching chick 🐣|Hawk 🦅|Headphones 🎧|Hen 🐔|Herb 🌿|Hiking boot 🥾
+      |Honeybee 🐝|Hospital 🏥|Hot pepper 🌶️|Hourglass ⏳|Hug 🤗|Hut 🛖|Hello 👋|Happy 😊|Helmet ⛑️|Hockey 🏒|Ham 🍖
+      |Horn 📯|Hot chocolate ☕`,
+    I: `Ice cream 🍦|Island 🏝️|Ice 🧊|Iguana 🦎|Inchworm 🐛|Insect 🪲|Ice skates ⛸️|Ice hockey 🏒|Idea 💡
+      |Itsy bitsy spider 🕷️|Ice cream sundae 🍨|Ink pen 🖋️|Instrument 🎺|Infant 👶|Ice crystal ❄️|Fish 🐟|Pig 🐷
+      |Kite 🪁|Pizza 🍕|Bird 🐦|Lion 🦁|Tiger 🐯|Giraffe 🦒|Chick 🐥|Milk 🥛|Rainbow 🌈|Ring 💍|Ship 🚢|Smile 😊
+      |Bike 🚲|Kitten 🐈|Dolphin 🐬|Shrimp 🦐`,
+    J: `Juice 🧃|Jeans 👖|Jacket 🧥|Jellyfish 🪼|Jar 🫙|Jet 🛩️|Juggler 🤹|Jigsaw puzzle 🧩|Jeep 🚙|Jaguar 🐆
+      |Joystick 🕹️|Jewel 💎|Jogging 🏃|Joy 😂|Jump 🦘|Jungle 🌴|Jet ski 🚤|Jalapeño 🌶️|Jersey 🎽|Journal 📔|Jelly 🍮
+      |Jumbo 🐘|Jolly 😄|Jay 🐦|Judge 🧑‍⚖️|Jade plant 🪴|Jaws 🦈|Banjo 🪕|Ninja 🥷|Pajamas 🛌|Enjoy 😋`,
+    K: `Kangaroo 🦘|Key 🔑|Kite 🪁|Koala 🐨|Kiwi 🥝|Kitten 🐈|King 🤴|Kiss 😘|Keyboard ⌨️|Kettle 🫖|Kimono 👘
+      |Kick scooter 🛴|Kayak 🛶|Kid 🧒|Knot 🪢|Kebab 🍢|Karate 🥋|Kale 🥬|Kitty 🐱|Kissy cat 😽|Duck 🦆|Monkey 🐵
+      |Cake 🍰|Book 📖|Snake 🐍|Chicken 🐔|Cookie 🍪|Skunk 🦨|Sock 🧦|Truck 🚚|Shark 🦈|Rocket 🚀`,
+    L: `Lion 🦁|Lemon 🍋|Ladybug 🐞|Leaf 🍃|Llama 🦙|Lollipop 🍭|Leopard 🐆|Lizard 🦎|Lobster 🦞|Lock 🔒|Lips 👄
+      |Leg 🦵|Lettuce 🥬|Laptop 💻|Lamb 🐑|Lake 🏞️|Letter ✉️|Light bulb 💡|Lightning ⚡|Lotus 🪷|Lipstick 💄|Log 🪵
+      |Lunchbox 🍱|Luggage 🧳|Love 💕|Laugh 😂|Leaves 🍂|Locomotive 🚂|Ladder 🪜|Laundry basket 🧺|Library 📚|Loaf 🍞`,
+    M: `Monkey 🐵|Moon 🌙|Mouse 🐭|Mango 🥭|Mushroom 🍄|Milk 🥛|Mermaid 🧜‍♀️|Magnet 🧲|Map 🗺️|Motorcycle 🏍️
+      |Mountain ⛰️|Melon 🍈|Medal 🏅|Mammoth 🦣|Meat 🍖|Microphone 🎤|Microscope 🔬|Mittens 🧤|Moose 🫎|Mosquito 🦟
+      |Mailbox 📫|Magnifying glass 🔍|Maple leaf 🍁|Muffin 🧁|Mug ☕|Music 🎶|Mommy 👩|Motor scooter 🛵|Muscle 💪
+      |Mirror 🪞|Maracas 🪇|Meteor ☄️`,
+    N: `Noodles 🍜|Nose 👃|Nuts 🥜|Note 🎵|Nest 🪺|Necktie 👔|Newspaper 📰|Night 🌃|Nine 9️⃣|Notebook 📓|Net 🥅
+      |Nap 😴|Nail polish 💅|Needle 🪡|Ninja 🥷|Nurse 🧑‍⚕️|Night owl 🦉|Number 🔢|No 🙅|Banana 🍌|Lion 🦁|Penguin 🐧
+      |Snail 🐌|Sun ☀️|Rainbow 🌈|Train 🚂|Corn 🌽|Onion 🧅|Panda 🐼|Pineapple 🍍|Unicorn 🦄`,
+    O: `Owl 🦉|Orange 🍊|Octopus 🐙|Otter 🦦|Ox 🐂|Olive 🫒|Onion 🧅|Ocean 🌊|Orangutan 🦧|Oyster 🦪|One 1️⃣
+      |Omelet 🍳|Okay 👌|Oatmeal 🥣|Outer space 🪐|Onigiri 🍙|Oh 😮|Ouch 🤕|Oops 🙊|Dog 🐶|Cow 🐮|Frog 🐸|Goat 🐐
+      |Horse 🐴|Moon 🌙|Boat ⛵|Robot 🤖|Rocket 🚀|Book 📖|Cookie 🍪|Snowman ⛄`,
+    P: `Pig 🐷|Penguin 🐧|Pear 🍐|Pineapple 🍍|Panda 🐼|Pizza 🍕|Parrot 🦜|Peacock 🦚|Popcorn 🍿|Puppy 🐕|Potato 🥔
+      |Pancakes 🥞|Paintbrush 🖌️|Pencil ✏️|Peanut 🥜|Pea pod 🫛|Pepper 🫑|Pie 🥧|Planet 🪐|Plant 🪴|Police car 🚓
+      |Poodle 🐩|Prawn 🦐|Present 🎁|Pretzel 🥨|Puzzle 🧩|Purse 👛|Purple 💜|Pickup truck 🛻|Polar bear 🐻‍❄️
+      |Postbox 📮|Prince 🤴|Princess 👸|Pudding 🍮|Paw prints 🐾|Parachute 🪂|Party 🎉|Phone 📱|Piano 🎹`,
+    Q: `Queen 👸|Quack 🦆|Quiet 🤫|Question ❓|Quarter moon 🌓|Quill 🪶|Queen bee 🐝|Quick 🏃|Quiz 📝|Quarter 🪙
+      |Queasy 🤢|Quote 💬|Squid 🦑|Squirrel 🐿️|Square 🟦|Mosquito 🦟|Bouquet 💐|Racquet 🏸|Equals 🟰|Banquet 🍽️
+      |Liquid 💧|Squeak 🐭|Squeeze 🤗|Aquarium 🐠|Sequins ✨|Squiggle 〰️|Equator 🌎|Turquoise 🩵|Squeaky clean 🫧
+      |Squawk 🦜|Squeal 🐷`,
+    R: `Rabbit 🐰|Rainbow 🌈|Rocket 🚀|Rooster 🐓|Robot 🤖|Rose 🌹|Rhino 🦏|Raccoon 🦝|Ring 💍|Rice 🍚|Rain 🌧️
+      |Racing car 🏎️|Radio 📻|Rat 🐀|Ram 🐏|Rice ball 🍙|Ribbon 🎀|Roller coaster 🎢|Roller skate 🛼|Rowboat 🚣
+      |Ruler 📏|Runner 🏃|Rugby 🏉|Red 🔴|Road 🛣️|Rock 🪨|Rope 🪢|Rubber duck 🦆|Ramen 🍜|Rattle 🪇|Raindrop 💧
+      |River 🏞️`,
+    S: `Sun ☀️|Star ⭐|Snake 🐍|Strawberry 🍓|Sheep 🐑|Snail 🐌|Shoe 👟|Snowman ⛄|Shark 🦈|Swan 🦢|Sloth 🦥
+      |Sandwich 🥪|Socks 🧦|Ship 🚢|Seal 🦭|Shell 🐚|Shrimp 🦐|Skunk 🦨|Sled 🛷|Slide 🛝|Smile 😊|Snowflake ❄️
+      |Soap 🧼|Soccer ball ⚽|Spaghetti 🍝|Spider 🕷️|Spoon 🥄|Squid 🦑|Squirrel 🐿️|Sunflower 🌻|Sushi 🍣
+      |Sweet potato 🍠|Swimmer 🏊|Sailboat ⛵|Salad 🥗|School 🏫|Skateboard 🛹|Sneeze 🤧|Soup 🍲|Sponge 🧽|Surfer 🏄`,
+    T: `Tiger 🐯|Turtle 🐢|Train 🚂|Tomato 🍅|Tree 🌳|Teddy bear 🧸|Tractor 🚜|Taco 🌮|Tooth 🦷|Tent ⛺|Trumpet 🎺
+      |Turkey 🦃|Truck 🚚|Tulip 🌷|T-shirt 👕|Taxi 🚕|Tea 🍵|Telephone ☎️|Telescope 🔭|Television 📺|Tennis 🎾
+      |Thumbs up 👍|Ticket 🎟️|Tie 👔|Toast 🍞|Toilet 🚽|Tongue 👅|Toothbrush 🪥|Top hat 🎩|Traffic light 🚦|Tram 🚋
+      |T. rex 🦖|Trophy 🏆|Tropical fish 🐠|Tangerine 🍊`,
+    U: `Umbrella ☂️|Unicorn 🦄|Upside down 🙃|UFO 🛸|Underwear 🩲|Uniform 🥋|Utensils 🍴|Up ⬆️|Unhappy 😞
+      |Unlock 🔓|Universe 🌌|Duck 🦆|Bus 🚌|Cupcake 🧁|Sun ☀️|Drum 🥁|Mouse 🐭|Truck 🚚|Bug 🐛|Butterfly 🦋
+      |Bunny 🐰|Turtle 🐢|Puppy 🐕|Cucumber 🥒|Mushroom 🍄|Juice 🧃|Hug 🤗|Bubbles 🫧|Sushi 🍣|Soup 🍲|Tulip 🌷`,
+    V: `Violin 🎻|Volcano 🌋|Van 🚐|Vegetables 🥦|Vase 🏺|Video game 🎮|Volleyball 🏐|Vest 🦺|Video camera 📹
+      |Village 🏘️|Victory ✌️|Violet 💜|Vanilla 🍦|Vroom 🏎️|Valley 🏞️|Five 5️⃣|Seven 7️⃣|Glove 🧤|Dove 🕊️|Love ❤️
+      |Wave 👋|Diver 🤿|Clover 🍀|Beaver 🦫|Movie 🎬|TV 📺|Silver medal 🥈|Avocado 🥑|Olive 🫒|Driver 🚗|Lavender 🪻`,
+    W: `Whale 🐳|Watermelon 🍉|Wolf 🐺|Watch ⌚|Wave 🌊|Worm 🪱|Wheel 🛞|Window 🪟|Waffle 🧇|Wind 🌬️|Wrench 🔧
+      |Water 💧|Wink 😉|Wing 🪽|Woman 👩|Wood 🪵|Wool 🧶|World 🌎|Wow 🤩|White 🤍|Walking 🚶|Wheat 🌾|Whiskers 🐱
+      |Wiggle 〰️|Woof 🐕|Weather ⛅|Cow 🐮|Owl 🦉|Snowman ⛄|Rainbow 🌈|Flower 🌸|Swan 🦢|Kiwi 🥝`,
+    X: `Fox 🦊|Box 📦|T. rex 🦖|Ox 🐂|Taxi 🚕|Saxophone 🎷|Mailbox 📫|Toolbox 🧰|Juice box 🧃|X-ray 🩻|Six 6️⃣
+      |Boxing glove 🥊|Relax 😌|Exit 🚪|Fax machine 📠|Excited 🤩|Explore 🧭|Exercise 🏋️|Extinguisher 🧯
+      |Expressway 🛣️|Index finger ☝️|Tuxedo 🤵|Wax crayon 🖍️|Lunchbox 🍱|Gift box 🎁|Mixing bowl 🥣|Text 💬|Fix 🔧
+      |X mark ❌|Toy box 🧸|Exhale 😮‍💨`,
+    Y: `Yo-yo 🪀|Yarn 🧶|Yawn 🥱|Yellow 💛|Yacht 🛥️|Yum 😋|Yes 👍|Yolk 🍳|Yikes 😬|Yay 🙌|Yoga 🧘|Yuck 🤢|You 🫵
+      |Baby 👶|Monkey 🐵|Butterfly 🦋|Bunny 🐰|Happy 😊|Key 🔑|Turkey 🦃|Donkey 🫏|Puppy 🐕|Pony 🐴|Daisy 🌼
+      |Candy 🍬|Honey 🍯|Party 🎉|Teddy 🧸|Crayon 🖍️|Sky 🌤️|Strawberry 🍓|Cherry 🍒|Family 👪|Bicycle 🚲`,
+    Z: `Zebra 🦓|Zzz 💤|Zero 0️⃣|Zipper 🤐|Zucchini 🥒|Zigzag ⚡|Zoo 🦁|Zoom 🚀|Zany 🤪|Pizza 🍕|Puzzle 🧩
+      |Lizard 🦎|Pretzel 🥨|Freeze 🥶|Breeze 🌬️|Blizzard 🌨️|Dizzy 💫|Fizzy 🥤|Frozen 🧊|Prize 🏆|Buzz 🐝|Sneeze 🤧
+      |Snooze 😴|Squeeze 🤗|Cozy 🛋️|Jazz 🎷|Quiz 📝|Amazing 🤩|Horizon 🌅|Glazed donut 🍩|Fuzzy 🧸`,
   };
   // How some words should be spoken aloud.
-  const SAY = { 'Zzz': 'z z z. Sleepy time', 'Quiet': 'quiet. Shhh', 'Quack': 'quack quack', 'T. rex': 'T rex', 'UFO': 'U F O' };
+  const SAY = {
+    'Zzz': 'z z z. Sleepy time', 'Quiet': 'quiet. Shhh', 'Quack': 'quack quack', 'T. rex': 'T rex', 'UFO': 'U F O',
+    'TV': 'T V', 'Buzz': 'buzz buzz', 'Woof': 'woof woof', 'Vroom': 'vroom vroom', 'Squeak': 'squeak squeak',
+  };
 
   // Things to count for 1-9, written as "picture one/many".
   const COUNTABLES = ('⭐ star/stars|🐞 ladybug/ladybugs|🍓 strawberry/strawberries|🐥 chick/chicks|🎈 balloon/balloons|'
@@ -428,7 +516,7 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   const hintText = $('hintText'), soundBtn = $('soundBtn'), fsBtn = $('fsBtn');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-  const parseList = str => str.split('|').map(s => {
+  const parseList = str => str.split('|').map(s => s.trim()).filter(Boolean).map(s => {
     const at = s.lastIndexOf(' ');
     return { word: s.slice(0, at), emoji: s.slice(at + 1) };
   });
